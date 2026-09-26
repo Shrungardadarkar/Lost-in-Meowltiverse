@@ -35,7 +35,9 @@ export class Game {
     this.checkpoint = 0; this.safePoint = 0; this.cycle = 0; this.biome = 0; this.adventure = 0; this.rescuedInAdventure = 0; this.rescueTarget = 2; this.rescueBoost = 0;
     this.time = 0; this.room = null; this.seen = new Set(); this.shield = 0; this.recovering = false;
     this.input = [false, false]; this.previousInput = [false, false]; this.tapWindow = [0, 0]; this.flips = [0, 0];
-    this.strikeLock = 0; this.guardLock = 0; this.railRescues = 0; this.particles = []; this.shake = 0; this.lesson = 0; this.perfects = 0;
+    this.strikeLock = 0; this.guardLock = 0; this.railRescues = 0; this.catching = null; this.particles = []; this.reboundCue = null; this.shake = 0; this.lesson = 0; this.perfects = 0;
+    this.skillProfile = { contacts: 0, perfects: 0, falls: 0, portalChoices: 0, rescueHits: 0 };
+    this.modules = []; this.generationIssues = []; this.generatorVersion = 2;
     this.savedCheckpoint = this.readSavedCheckpoint();
     this.objects = []; this.generated = 0; this.generate(6000);
     this.ball = { x: 210, y: 145, vx: 0, vy: 0, r: 13, trail: [] };
@@ -51,21 +53,27 @@ export class Game {
     this.state = 'playing'; this.launch();
   }
 
-  launch() { this.ball = { x: 210, y: this.camera + 146, vx: this.time % 2 > 1 ? -65 : 65, vy: 560, r: 13, trail: [] }; this.strikeLock = .3; this.recovering = false; }
-  resumeFromRecovery() { this.ball = { x: 210, y: this.camera + H - 72, vx: this.time % 2 > 1 ? -65 : 65, vy: -110, r: 13, trail: [] }; this.strikeLock = .3; this.recovering = true; }
+  launch() { this.catching = null; this.ball = { x: 210, y: this.camera + 146, vx: this.time % 2 > 1 ? -65 : 65, vy: 560, r: 13, trail: [] }; this.strikeLock = .3; this.recovering = false; }
+  resumeFromRecovery() { this.catching = null; this.ball = { x: 210, y: this.camera + H - 72, vx: this.time % 2 > 1 ? -65 : 65, vy: -110, r: 13, trail: [] }; this.strikeLock = .3; this.recovering = true; }
 
   buildModule(kind, y, r) {
     const star = (x, offset = 70) => this.objects.push({ type: 'star', x, y: y + offset, r: 9 });
     const bumper = (x, offset = 0, radius = 25) => this.objects.push({ type: 'bumper', x, y: y + offset, r: radius, cool: 0 });
     const rail = (x, offset, w, slant, aim) => this.objects.push({ type: 'rail', x, y: y + offset, w, slant, aim, cool: 0 });
     if (kind === 'catch-garden') {
-      bumper(145, 0, 24); bumper(275, 20, 24); star(145, 45); star(275, 72); rail(58, 118, 78, 1, 1); rail(284, 150, 78, -1, -1);
+      bumper(145, 0, 24); bumper(275, 20, 24); this.objects.push({ type: 'gate', x: 210, y: y + 78, r: 22, phase: r() * Math.PI * 2, cool: 0 });
+      star(145, 45); star(275, 72); rail(58, 135, 78, 1, 1); rail(284, 165, 78, -1, -1);
     } else if (kind === 'silver-bank') {
-      rail(42, 18, 116, 1, 1); rail(262, 118, 116, -1, -1); bumper(210, 100, 27); star(108, 95); star(312, 185);
+      const link = 'chrome-bridge-' + y;
+      rail(42, 18, 116, 1, 1);
+      this.objects.push({ type: 'rail', x: 262, y: y + 118, w: 116, slant: -1, aim: -1, link, active: false, cool: 0 });
+      this.objects.push({ type: 'bumper', x: 210, y: y + 100, r: 27, role: 'resonance', link, active: false, cool: 0 });
+      star(108, 95); star(312, 185);
     } else if (kind === 'pawprint-gate') {
       this.objects.push({ type: 'gate', x: 210, y: y + 72, r: 27, phase: r() * Math.PI * 2, cool: 0 });
       const route = r() > .5 ? 1 : -1;
-      bumper(102, 142, 23); bumper(318, 142, 23); star(210, 150); star(210, 198); rail(162, 220, 96, route, route);
+      bumper(102, 142, 23); bumper(318, 170, 23); star(210, 150); star(210, 198); rail(162, 220, 96, route, route);
+      this.objects.push({ type: 'portal', x: 328, y: y + 95, r: 30, kind: 'tide', cool: 0 });
     } else if (kind === 'tide-channel') {
       this.objects.push({ type: 'flow', x: 65, y: y + 15, w: 290, h: 175, dir: r() > .5 ? 1 : -1, strength: 250 });
       bumper(120, 55, 24); bumper(300, 135, 24); star(205, 80); star(255, 154); rail(55, 205, 90, 1, 1);
@@ -87,11 +95,37 @@ export class Game {
       this.objects.push({ type: 'portal', x: r() > .5 ? 92 : 328, y: y + 95, r: 34, kind: 'time', cool: 0 });
       this.objects.push({ type: 'gate', x: 210, y: y + 185, r: 25, phase: r() * Math.PI * 2, cool: 0 }); star(210, 145);
     } else if (kind === 'spirit-rescue') {
-      this.objects.push({ type: 'cat', x: 210 + (r() - .5) * 150, y: y + 76, r: 25, hits: 0, requiredHits: 3, adventure: Math.floor(y / 1500), cool: 0 });
-      bumper(92, 150, 23); bumper(328, 150, 23); star(210, 160); star(210, 210);
+      this.objects.push({ type: 'cat', x: 210 + (r() - .5) * 150, y: y + 76, r: 25, hits: 0, requiredHits: 3, adventure: Math.floor((y - 330) / 1500), cool: 0 });
+      bumper(92, 150, 23); bumper(328, 150, 23); rail(42, 42, 104, 1, 1); rail(274, 42, 104, -1, -1); star(210, 160); star(210, 210);
     } else {
       bumper(210, 60, 27); star(160, 120); star(260, 150); rail(52, 185, 86, 1, 1);
     }
+  }
+
+  choosePlan(plans, biome, slot) {
+    const base = plans[biome][slot];
+    if (this.adventure < 1) return base;
+    const struggle = this.skillProfile.falls > this.skillProfile.perfects + 2;
+    const mastery = this.skillProfile.perfects > this.skillProfile.falls + 5;
+    if (struggle && slot === 3) return ['pawprint-gate', 'tide-channel', 'clock-gate'][biome];
+    if (mastery && slot === 1) return ['silver-bank', 'tide-choir', 'mandala-bloom'][biome];
+    return base;
+  }
+
+  validateModule(kind, biome, y, startIndex) {
+    const segment = this.objects.slice(startIndex);
+    const inBounds = segment.every(o => Number.isFinite(o.x) && Number.isFinite(o.y) && o.y >= y - 1 && o.y <= y + 310);
+    const circles = segment.filter(o => Number.isFinite(o.r));
+    const overlap = circles.some((a, i) => circles.slice(i + 1).some(b => Math.hypot(a.x - b.x, a.y - b.y) < (a.r + b.r) * .35));
+    if (inBounds && !overlap) return true;
+    this.generationIssues.push({ kind, biome, y, reason: inBounds ? 'overlap' : 'out-of-bounds' });
+    this.objects.splice(startIndex);
+    this.buildModule(['catch-garden', 'tide-channel', 'mandala-bloom'][biome], y, random(y + this.generatorVersion));
+    return false;
+  }
+
+  generationReport() {
+    return { version: this.generatorVersion, cycle: this.cycle, modules: this.modules.map(module => ({ ...module })), issues: this.generationIssues.map(issue => ({ ...issue })) };
   }
 
   generate(top) {
@@ -102,8 +136,10 @@ export class Game {
     ];
     while (this.generated < top) {
       const index = Math.floor(this.generated / 300), y = this.generated + 330;
-      const biome = Math.floor(y / 1500) % 3, plan = plans[biome][Math.floor((y % 1500) / 300)];
+      const biome = Math.floor(this.generated / 1500) % 3, slot = Math.floor((this.generated % 1500) / 300), plan = this.choosePlan(plans, biome, slot), startIndex = this.objects.length;
       this.buildModule(plan, y, random(index + 17 + this.cycle * 71));
+      this.validateModule(plan, biome, y, startIndex);
+      this.modules.push({ index, kind: plan, biome, y, slot, seed: (index + 17 + this.cycle * 71) >>> 0, difficulty: slot === 0 ? 1 : slot === 1 || slot === 4 ? 2 : 3 });
       if (index % 7 === 6) this.objects.push({ type: 'bell', x: 210, y: y + 235, r: 12 });
       this.generated += 300;
     }
@@ -124,7 +160,7 @@ export class Game {
   rescueCat(cat, x) {
     const marks = this.rescueBoost ? 2 : 1;
     if (this.rescueBoost) { this.rescueBoost = 0; this.emit('booster', 'Portal pulse used · two rescue marks.'); }
-    cat.hits = Math.min(cat.requiredHits || 3, cat.hits + marks);
+    cat.hits = Math.min(cat.requiredHits || 3, cat.hits + marks); this.skillProfile.rescueHits += marks;
     if (cat.hits < (cat.requiredHits || 3)) { this.emit('rescue', 'Rescue pulse · ' + cat.hits + '/' + (cat.requiredHits || 3)); return false; }
     cat.dead = true; this.freed++; this.rescuedInAdventure++; this.addScore(200); this.emit('spirit', 'A cat spirit is free. “The trail is brighter now.”'); this.burst(x, cat.y, '#b8f8d8', 30);
     if (this.rescuedInAdventure >= this.rescueTarget) { this.completeAdventure(); return true; }
@@ -133,7 +169,7 @@ export class Game {
 
   enterRoom(portal) {
     if (this.room) return;
-    portal.used = true;
+    portal.used = true; this.skillProfile.portalChoices++;
     this.room = { kind: portal.kind, returnY: this.ball.y + 120, camera: this.camera, objects: this.objects, elapsed: 0, collected: 0, entranceSafePoint: this.safePoint };
     this.objects = [];
     for (let i = 0; i < 5; i++) {
@@ -161,7 +197,7 @@ export class Game {
     if (this.room) { this.objects = this.room.objects; this.camera = this.room.camera; this.safePoint = this.room.entranceSafePoint; this.room = null; }
     this.camera = Math.max(0, this.safePoint - (H - 226));
     if (this.shield) { this.shield = 0; this.resumeFromRecovery(); this.emit('shield', 'Spirit Shield held the fall · returning to your last safe point.'); return; }
-    this.lives--; this.shake = 12;
+    this.lives--; this.skillProfile.falls++; this.shake = 12;
     if (this.lives <= 0) { this.lives = 0; this.state = 'gameover'; this.emit('gameover', 'Even little spirits need a second chance.'); return; }
     this.resumeFromRecovery(); this.emit('lost', (fromRoom ? 'Portal room ended · ' : 'Center drain crossed · ') + 'one bell fades. Returning from above the last safe point.');
   }
@@ -210,6 +246,7 @@ export class Game {
   step(dt) {
     if (this.state !== 'playing') return;
     this.time += dt; this.shake *= .9; this.strikeLock = Math.max(0, this.strikeLock - dt); this.guardLock = Math.max(0, this.guardLock - dt);
+    if (this.reboundCue) { this.reboundCue.life -= dt; if (this.reboundCue.life <= 0) this.reboundCue = null; }
     for (let i = 0; i < 2; i++) {
       if (this.input[i] && !this.previousInput[i]) this.tapWindow[i] = .16;
       else this.tapWindow[i] = Math.max(0, this.tapWindow[i] - dt);
@@ -217,10 +254,16 @@ export class Game {
       this.flips[i] += ((this.input[i] ? 1 : 0) - this.flips[i]) * Math.min(1, dt * 24);
     }
     const b = this.ball;
+    if (this.catching !== null && !this.input[this.catching]) {
+      const released = this.catching;
+      this.catching = null;
+      this.emit('release', '', { side: released, x: b.x, y: b.y });
+    }
     if (this.room) { this.room.elapsed += dt; if (this.room.elapsed > 30) { this.exitRoom(); return; } }
     const speed = this.room?.kind === 'time' ? .58 : 1, h = dt * speed;
     b.vy -= (this.room?.kind === 'tide' ? 370 : 620) * h; this.applyEnvironments(b, h);
     b.vx *= Math.pow(.998, h * 120); b.vx = clamp(b.vx, -440, 440); b.vy = clamp(b.vy, -1000, 1050);
+    const previousPosition = { x: b.x, y: b.y };
     b.x += b.vx * h; b.y += b.vy * h;
     if (b.x < b.r + 18) { b.x = b.r + 18; b.vx = Math.abs(b.vx) * .83; }
     if (b.x > W - b.r - 18) { b.x = W - b.r - 18; b.vx = -Math.abs(b.vx) * .83; }
@@ -229,13 +272,18 @@ export class Game {
     for (let i = 0; i < 2; i++) {
       const f = this.flipper(i), hit = segmentHit(b, f, { x: f.ex, y: f.ey });
       if (hit.dist < b.r + 9 && b.y > hit.y - 10 && b.vy < 200 && this.strikeLock === 0) {
+        if (this.recovering) this.recovering = false;
+        this.skillProfile.contacts++;
         const quality = this.tapWindow[i] > 0 ? clamp((this.tapWindow[i] - .025) / .135, 0, 1) : 0, perfect = quality > .72;
         b.y = hit.y + b.r + 10;
         b.vy = quality ? 540 + quality * 410 : Math.max(80, Math.min(130, Math.abs(b.vy) * .18 + 55));
-        b.vx = (i === 0 ? 1 : -1) * (quality ? (70 + quality * (90 + hit.t * 210)) : 36);
-        this.tapWindow[i] = 0; this.railRescues = quality ? 0 : this.railRescues; this.strikeLock = .13;
-        this.emit(perfect ? 'perfect' : quality ? 'flip' : 'catch', '', { x: b.x, y: b.y, side: i, quality }); this.burst(b.x, b.y, BIOMES[this.biome].color, perfect ? 16 : quality ? 7 : 3);
-        if (perfect) { this.perfects++; this.shake = 4; }
+        const sign = i === 0 ? 1 : -1, fan = (hit.t - .5) * 2;
+        const lateral = quality ? 70 + quality * (90 + hit.t * 210) + fan * quality * 80 : 36;
+        b.vx = sign * Math.max(28, lateral);
+        this.reboundCue = { x: b.x, y: b.y, vx: b.vx, vy: b.vy, life: .22 };
+        this.tapWindow[i] = 0; this.railRescues = quality ? 0 : this.railRescues; this.catching = quality ? null : i; this.strikeLock = .13;
+        this.emit(perfect ? 'perfect' : quality ? 'flip' : 'catch', '', { x: b.x, y: b.y, side: i, quality, fan }); this.burst(b.x, b.y, BIOMES[this.biome].color, perfect ? 16 : quality ? 7 : 3);
+        if (perfect) { this.perfects++; this.skillProfile.perfects++; this.shake = 4; }
         if (quality > .4 && this.lesson === 0) { this.lesson = 1; this.emit('tutorial', 'Good save. Release, then tap again just before contact to choose a stronger route.'); }
       }
     }
@@ -244,8 +292,11 @@ export class Game {
       o.cool = Math.max(0, (o.cool || 0) - dt);
       if (o.dead || o.used || Math.abs(o.y - b.y) > 145) continue;
       let x = o.x; if (o.type === 'cat') x += Math.sin(this.time * 1.3 + o.y) * 28;
-      const dx = b.x - x, dy = b.y - o.y, dist = Math.hypot(dx, dy);
+      let dx = b.x - x, dy = b.y - o.y, dist = Math.hypot(dx, dy);
+      const swept = segmentHit({ x, y: o.y }, previousPosition, b);
+      if (swept.dist < dist) { dx = swept.x - x; dy = swept.y - o.y; dist = swept.dist; }
       if (o.type === 'rail' || o.type === 'break') {
+        if (o.type === 'rail' && o.link && !o.active) continue;
         const end = o.x + o.w, surface = o.y + (o.type === 'rail' ? (b.x - o.x) * o.slant * .28 : 0);
         if (b.x > o.x - 8 && b.x < end + 8 && Math.abs(b.y - surface) < b.r + 9 && o.cool === 0) {
           if (o.type === 'break') { o.dead = true; this.addScore(75); this.burst(b.x, o.y, '#e4b4ff', 18); b.vy = 650; this.emit('hit'); }
@@ -262,12 +313,26 @@ export class Game {
         if (o.type === 'exit') { this.exitRoom(); return; }
         if ((o.type === 'bumper' || o.type === 'cat' || o.type === 'mandala' || o.type === 'gate') && o.cool === 0) {
           const nx = dx / (dist || 1), ny = dy / (dist || 1), gateOpen = o.type !== 'gate' || Math.sin(this.time * 3.2 + o.phase) > .05;
+          if (o.type === 'gate' && gateOpen) { o.cool = .08; continue; }
           b.x = x + nx * (b.r + o.r + 1); b.y = o.y + ny * (b.r + o.r + 1);
           if (o.type === 'mandala') {
             const spin = Math.sin(this.time * 1.8 + o.phase) > 0 ? 1 : -1;
             b.vx = nx * 250 - ny * 140 * spin; b.vy = Math.max(410, b.vy * .26 + 250);
           } else if (o.type === 'gate' && !gateOpen) {
             b.vx = nx * 160; b.vy = Math.max(260, b.vy * .18 + 185); this.emit('gate-wait');
+          } else if (o.type === 'bumper') {
+            const incoming = b.vx * nx + b.vy * ny;
+            if (incoming < 0) {
+              b.vx -= (1 + .86) * incoming * nx;
+              b.vy -= (1 + .86) * incoming * ny;
+            }
+            this.reboundCue = { x, y: o.y, vx: b.vx, vy: b.vy, life: .32 };
+            if (o.role === 'resonance' && !o.active) {
+              o.active = true;
+              const bridge = this.objects.find(candidate => candidate.type === 'rail' && candidate.link === o.link);
+              if (bridge) bridge.active = true;
+              this.emit('resonance', '', { x, y: o.y });
+            }
           } else {
             b.vx = nx * 260 + (b.x < 210 ? 50 : -50); b.vy = Math.max(300, b.vy * .22 + 175);
           }
@@ -276,7 +341,7 @@ export class Game {
         }
       }
     }
-    this.camera += (Math.max(this.camera, b.y - 470) - this.camera) * Math.min(1, dt * 6);
+    if (!this.recovering) this.camera += (Math.max(this.camera, b.y - 470) - this.camera) * Math.min(1, dt * 6);
     if (!this.room) {
       const measuredHeight = b.y - 146;
       if (this.recovering && measuredHeight <= this.safePoint) this.recovering = false;

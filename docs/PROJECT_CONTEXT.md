@@ -4,7 +4,7 @@
 
 *Lost in Meowltiverse* is a browser-first, portrait pinball climb. A reactive cat-spirit orb searches a strange vertical multiverse for its lost dog friend. The player has only two inputs: left and right flippers. The prototype uses hand-authored object types assembled into a deterministic procedural climb.
 
-The current playable scope includes a single phone-sized playfield, Chrome Root, Tide Cathedral, Clockwork Bloom, authored climb-module decks, directional chevron bank rails, protected lower side rails, graded tap-timing flippers, living currents, interactive mandalas and rhythm gates, two pocket-dimension rules, Japanese-animation-inspired impact punctuation, possessed cats that become friendly spirits, seven collar bells, local biome checkpoint continuity, and a false summit that can continue into another universe.
+The current playable scope includes a single phone-sized playfield, Chrome Root, Tide Cathedral, Clockwork Bloom, authored climb-module decks, directional chevron bank rails, a two-shot Chrome Root resonance bridge, protected lower side rails, graded tap-timing flippers, living currents, interactive mandalas and rhythm gates, two pocket-dimension rules, Japanese-animation-inspired impact punctuation, possessed cats that become friendly spirits, seven collar bells, local adventure checkpoint continuity, and a false summit that can continue into another universe. Each adventure now asks for two three-hit cat-spirit rescues; a completed portal can grant one rescue-boosting Portal Pulse.
 
 ## Current truth in code
 
@@ -21,10 +21,12 @@ The current playable scope includes a single phone-sized playfield, Chrome Root,
 
 - Discovery is the primary solo reward; score is secondary and does not gate progress.
 - A fall removes one bell and restarts at the previous safe elevation. A full loss restores the current biome checkpoint.
+- During fall recovery, the camera stays at the saved section until the orb reaches a flipper; the next deliberate contact resumes ascent tracking.
 - Every portal changes one local rule for a short pocket world and returns the player to stable main-climb physics.
 - Chrome Root teaches catch and bank routes; Tide Cathedral's current changes trajectory; Clockwork Bloom uses mandala redirects and clearly cycling gates.
 - Lower side rails return a near-miss once, then guide it toward the center; timing a fresh flipper tap at contact is the core climb skill.
 - Chevron rails create high-value routes only when the orb enters with the matching lateral direction. Ordinary collisions are recovery, not automatic climb energy.
+- Round bumpers reflect incoming momentum rather than awarding automatic altitude. The optional Chrome Root resonance target opens one linked high bridge while leaving the lower route available.
 - Perfect flips, bank shots, and dimensional transitions receive short squash, speed-line, impact-zoom, and color-pulse moments; reduced-motion retains the underlying information without the flourish.
 - The game uses only essential HUD information (bells, altitude, biome). Routine prompts and side-panel progression are deliberately absent.
 - The game is surreal and psychedelic, but visual anomaly must clarify rather than disguise the active physics rule.

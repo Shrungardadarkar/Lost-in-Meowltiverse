@@ -20,9 +20,15 @@ A flipper receives its strong launch only on a fresh press close to contact. Hol
 
 Idle flippers remain solid: they catch a descending orb and send it into a soft inward bounce. That bounce deliberately has too little energy to sustain the climb, so waiting leads naturally toward the visible centre drain. A fresh press at contact remains the strong, directional rescue shot.
 
+When the player keeps a flipper held through a soft contact, the engine marks a brief catch posture and visually warms that flipper. The catch never grants climb energy; releasing it returns the orb to play so a later fresh tap remains the meaningful shot.
+
 ## 2026-09-26 — Side lanes guide; the center drain decides
 
 The lower side spaces are protected by diagonal guide rails that redirect a descending orb inward. This preserves traditional pinball's readable lower-playfield geometry without making a near-miss feel arbitrarily expensive. The center drain remains the clearly signaled failure route.
+
+## 2026-09-26 — Recovery stays in the saved playfield
+
+After a fall, the camera remains anchored to the saved safe section while the orb visibly drops back into the flippers. Recovery ends on the first flipper contact, so the player can immediately earn a new climb rather than the camera following a recovery ball into an untracked height.
 
 ## 2026-09-26 — Living environments are physical, not decorative
 
@@ -48,9 +54,29 @@ The prototype presents one phone-sized playfield, not a dashboard. Routine feedb
 
 A close flipper tap creates a powerful launch, while a late tap is a smaller recovery. Chevron rails advertise a lateral direction: entering on that vector creates a strong bank; entering against it is safe but weak. Bumpers, gates, and lower guide rails preserve play but must not carry the climb by themselves. This protects player agency and gives every high ascent an understandable cause.
 
+## 2026-09-26 — Bumpers redirect; resonance targets change the playfield
+
+Ordinary round bumpers reflect the orb's incoming velocity with energy loss instead of assigning a minimum upward launch. A marked resonance bumper can solidify one linked optional bridge. The main route stays available before activation, so the player chooses whether to set up and take the two-shot route. The target/bridge link and active state remain visible without motion or sound.
+
+## 2026-09-26 — Fast contacts are swept
+
+Moving circular targets use the orb's previous-to-current segment when checking contact, so high-speed shots cannot pass through a bumper, portal, gate, or rescue target between fixed simulation frames. The resolved response remains the same physical rule as a normal contact.
+
+## 2026-09-26 — Generation is seeded, bounded, and self-observing
+
+Every authored module records a deterministic seed, slot, biome, and difficulty tier. New modules validate finite coordinates, vertical bounds, and meaningful circle separation; invalid geometry falls back to a biome-safe module and is reported. After the tutorial adventure, a small bounded selector can favor a recovery variant after repeated falls or a more expressive variant after demonstrated mastery. This is an assistive adaptation, not a hidden difficulty treadmill, and the report makes generated behavior inspectable for future replay and fuzz tests.
+
 ## 2026-09-26 — Kinetic animation punctuates commitment
 
 Perfect flips, correctly aimed bank shots, portal crossings, spirit releases, and mandala redirects may use short Japanese-animation-inspired squash-and-stretch, speed lines, impact zoom, and color accents. They must last only long enough to punctuate the action, never obscure the orb or flippers, and reduce to stable visual cues under reduced motion.
+
+## 2026-09-26 — Contact point creates a bounded shot fan
+
+A fresh flipper press now uses the orb's contact fraction along the flipper to vary lateral aim. The fan is deliberately small and deterministic: it gives agency without requiring a new button, while late/held contacts remain recovery bounces. A directional arrow and orb trail communicate the result; reduced motion keeps those static cues.
+
+## 2026-09-26 — Opening rooms must present a choice before a target
+
+The first Chrome Root modules now place a visible center gate or directional bank before the next rescue/portal objective. The player can choose a clean setup through the gate or a left/right release bank; neither route is score-gated or required for survival. Rescue rooms also show side approach rails so repeated cat impacts are shaped by aim rather than passive bumper contact.
 
 ## 2026-09-26 — Repository context is part of the product
 

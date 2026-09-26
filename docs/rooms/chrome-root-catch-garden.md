@@ -12,9 +12,9 @@
 
 | Stage | Layout and behavior | Player feedback | Failure and recovery |
 | --- | --- | --- | --- |
-| Preview | A low bumper and two slanted chrome rails show the available return angles. | Rail lines, warm impact pulse, and lower guide-rail signage. | Near-misses enter side guide rails rather than an immediate drain. |
+| Preview | Two low bumpers frame a cycling center gate; two slanted chrome rails show the left/right release banks. | Gate opening, rail lines, warm impact pulse, and lower guide-rail signage. | Near-misses enter side guide rails rather than an immediate drain. |
 | Practice | One bumper creates a repeatable medium arc back to a flipper. Idle flippers catch it with a soft inward bounce; a fresh tap turns that contact into a strong route shot. | A small directional burst follows the bounce, while the centre gap is visibly labelled. | Repeated idle catches lose height until the center drain removes one bell and respawns at the safe elevation. |
-| Choice | A left and right bank each lead to a visible pawprint or spirit route. | Both routes stay visible; neither is score-gated. | The unchosen route remains a later discovery, not a lost reward. |
+| Choice | The player can thread the center gate when open for a clean setup, or let the orb fall into either directional bank. | The gate gives a gentle closed bounce; matching rail arrows show the stronger left/right route. | A missed gate or wrong-way bank remains recoverable and does not erase the next route. |
 | Release | A broad rail feeds the next authored module. | Sound resolves and motion quiets briefly. | No countdown, streak, or forced continuation. |
 
 ## Behavioral review
