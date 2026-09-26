@@ -34,7 +34,7 @@ export class Game {
     this.state = 'ready'; this.camera = 0; this.maxHeight = 0; this.lives = 7; this.score = 0; this.freed = 0;
     this.checkpoint = 0; this.safePoint = 0; this.cycle = 0; this.biome = 0; this.time = 0; this.room = null; this.seen = new Set(); this.shield = 0; this.recovering = false;
     this.input = [false, false]; this.previousInput = [false, false]; this.tapWindow = [0, 0]; this.flips = [0, 0];
-    this.strikeLock = 0; this.guardLock = 0; this.particles = []; this.shake = 0; this.lesson = 0;
+    this.strikeLock = 0; this.guardLock = 0; this.railRescues = 0; this.particles = []; this.shake = 0; this.lesson = 0; this.perfects = 0;
     this.savedCheckpoint = this.readSavedCheckpoint();
     this.objects = []; this.generated = 0; this.generate(6000);
     this.ball = { x: 210, y: 145, vx: 0, vy: 0, r: 13, trail: [] };
@@ -50,37 +50,38 @@ export class Game {
     this.state = 'playing'; this.launch();
   }
 
-  launch() { this.ball = { x: 210, y: this.camera + 146, vx: this.time % 2 > 1 ? -65 : 65, vy: 670, r: 13, trail: [] }; this.strikeLock = .3; this.recovering = false; }
+  launch() { this.ball = { x: 210, y: this.camera + 146, vx: this.time % 2 > 1 ? -65 : 65, vy: 560, r: 13, trail: [] }; this.strikeLock = .3; this.recovering = false; }
   resumeFromRecovery() { this.ball = { x: 210, y: this.camera + H - 72, vx: this.time % 2 > 1 ? -65 : 65, vy: -110, r: 13, trail: [] }; this.strikeLock = .3; this.recovering = true; }
 
   buildModule(kind, y, r) {
     const star = (x, offset = 70) => this.objects.push({ type: 'star', x, y: y + offset, r: 9 });
     const bumper = (x, offset = 0, radius = 25) => this.objects.push({ type: 'bumper', x, y: y + offset, r: radius, cool: 0 });
-    const rail = (x, offset, w, slant) => this.objects.push({ type: 'rail', x, y: y + offset, w, slant, cool: 0 });
+    const rail = (x, offset, w, slant, aim) => this.objects.push({ type: 'rail', x, y: y + offset, w, slant, aim, cool: 0 });
     if (kind === 'catch-garden') {
-      bumper(145, 0, 24); bumper(275, 20, 24); star(145, 45); star(275, 72); rail(58, 118, 78, 1); rail(284, 150, 78, -1);
+      bumper(145, 0, 24); bumper(275, 20, 24); star(145, 45); star(275, 72); rail(58, 118, 78, 1, 1); rail(284, 150, 78, -1, -1);
     } else if (kind === 'silver-bank') {
-      rail(42, 18, 116, 1); rail(262, 118, 116, -1); bumper(210, 100, 27); star(108, 95); star(312, 185);
+      rail(42, 18, 116, 1, 1); rail(262, 118, 116, -1, -1); bumper(210, 100, 27); star(108, 95); star(312, 185);
     } else if (kind === 'pawprint-gate') {
       this.objects.push({ type: 'gate', x: 210, y: y + 72, r: 27, phase: r() * Math.PI * 2, cool: 0 });
-      bumper(102, 142, 23); bumper(318, 142, 23); star(210, 150); star(210, 198);
+      const route = r() > .5 ? 1 : -1;
+      bumper(102, 142, 23); bumper(318, 142, 23); star(210, 150); star(210, 198); rail(162, 220, 96, route, route);
     } else if (kind === 'tide-channel') {
       this.objects.push({ type: 'flow', x: 65, y: y + 15, w: 290, h: 175, dir: r() > .5 ? 1 : -1, strength: 250 });
-      bumper(120, 55, 24); bumper(300, 135, 24); star(205, 80); star(255, 154); rail(55, 205, 90, 1);
+      bumper(120, 55, 24); bumper(300, 135, 24); star(205, 80); star(255, 154); rail(55, 205, 90, 1, 1);
     } else if (kind === 'tide-choir') {
       this.objects.push({ type: 'flow', x: 40, y: y + 25, w: 340, h: 125, dir: -1, strength: 190 });
-      bumper(210, 75, 30); star(125, 145); star(210, 175); star(295, 145); rail(286, 210, 85, -1);
+      bumper(210, 75, 30); star(125, 145); star(210, 175); star(295, 145); rail(286, 210, 85, -1, -1);
     } else if (kind === 'moon-door') {
       this.objects.push({ type: 'portal', x: r() > .5 ? 92 : 328, y: y + 95, r: 34, kind: 'tide', cool: 0 });
       this.objects.push({ type: 'flow', x: 62, y: y + 155, w: 296, h: 64, dir: r() > .5 ? -1 : 1, strength: 160 });
-      bumper(210, 160, 25); star(210, 215);
+      bumper(210, 160, 25); star(210, 215); rail(50, 245, 104, 1, 1);
     } else if (kind === 'mandala-bloom') {
       this.objects.push({ type: 'mandala', x: 210, y: y + 88, r: 40, phase: r() * Math.PI * 2, cool: 0 });
-      star(125, 75); star(295, 75); rail(42, 175, 90, 1); rail(288, 175, 90, -1);
+      star(125, 75); star(295, 75); rail(42, 175, 90, 1, 1); rail(288, 175, 90, -1, -1);
     } else if (kind === 'clock-gate') {
       this.objects.push({ type: 'gate', x: 210, y: y + 60, r: 30, phase: r() * Math.PI * 2, cool: 0 });
       this.objects.push({ type: 'mandala', x: 120, y: y + 165, r: 30, phase: r() * Math.PI * 2, cool: 0 });
-      star(300, 120); star(210, 210); rail(280, 215, 86, -1);
+      star(300, 120); star(210, 210); rail(280, 215, 86, -1, -1);
     } else if (kind === 'time-door') {
       this.objects.push({ type: 'portal', x: r() > .5 ? 92 : 328, y: y + 95, r: 34, kind: 'time', cool: 0 });
       this.objects.push({ type: 'gate', x: 210, y: y + 185, r: 25, phase: r() * Math.PI * 2, cool: 0 }); star(210, 145);
@@ -88,7 +89,7 @@ export class Game {
       this.objects.push({ type: 'cat', x: 210 + (r() - .5) * 150, y: y + 76, r: 25, hits: 0, cool: 0 });
       bumper(92, 150, 23); bumper(328, 150, 23); star(210, 160); star(210, 210);
     } else {
-      bumper(210, 60, 27); star(160, 120); star(260, 150); rail(52, 185, 86, 1);
+      bumper(210, 60, 27); star(160, 120); star(260, 150); rail(52, 185, 86, 1, 1);
     }
   }
 
@@ -168,9 +169,13 @@ export class Game {
       const hit = segmentHit(b, guard.a, guard.b), inward = guard.side === 0 ? 1 : -1;
       const isInside = guard.side === 0 ? b.x > hit.x : b.x < hit.x;
       if (isInside && hit.dist < b.r + 8 && b.vy < 120) {
+        if (this.railRescues >= 1) {
+          b.x = 210; b.y = this.camera + 78; b.vx = 0; b.vy = -220; this.railRescues = 0;
+          this.guardLock = .18; this.emit('rail'); return;
+        }
         b.x = hit.x + inward * (b.r + 9); b.y = hit.y;
-        b.vx = inward * Math.max(150, Math.abs(b.vx) * .45 + 105); b.vy = Math.max(140, b.vy * .18 + 95);
-        this.guardLock = .12; this.addScore(10); this.emit('rail'); this.burst(hit.x, hit.y, BIOMES[this.biome].color, 8); return;
+        b.vx = inward * Math.max(110, Math.abs(b.vx) * .38 + 75); b.vy = Math.max(45, b.vy * .12 + 55);
+        this.railRescues++; this.guardLock = .12; this.addScore(10); this.emit('rail'); this.burst(hit.x, hit.y, BIOMES[this.biome].color, 8); return;
       }
     }
   }
@@ -205,12 +210,14 @@ export class Game {
     for (let i = 0; i < 2; i++) {
       const f = this.flipper(i), hit = segmentHit(b, f, { x: f.ex, y: f.ey });
       if (hit.dist < b.r + 9 && b.y > hit.y - 10 && b.vy < 200 && this.strikeLock === 0) {
-        const timed = this.tapWindow[i] > 0;
+        const quality = this.tapWindow[i] > 0 ? clamp((this.tapWindow[i] - .025) / .135, 0, 1) : 0, perfect = quality > .72;
         b.y = hit.y + b.r + 10;
-        b.vy = timed ? 900 : Math.max(80, Math.min(130, Math.abs(b.vy) * .18 + 55));
-        b.vx = (i === 0 ? 1 : -1) * (timed ? (105 + hit.t * 240) : 36);
-        this.tapWindow[i] = 0; this.strikeLock = .13; this.emit(timed ? 'flip' : 'catch'); this.burst(b.x, b.y, BIOMES[this.biome].color, timed ? 9 : 4);
-        if (timed && this.lesson === 0) { this.lesson = 1; this.emit('tutorial', 'Good save. Release, then tap again just before contact to choose a stronger route.'); }
+        b.vy = quality ? 540 + quality * 410 : Math.max(80, Math.min(130, Math.abs(b.vy) * .18 + 55));
+        b.vx = (i === 0 ? 1 : -1) * (quality ? (70 + quality * (90 + hit.t * 210)) : 36);
+        this.tapWindow[i] = 0; this.railRescues = quality ? 0 : this.railRescues; this.strikeLock = .13;
+        this.emit(perfect ? 'perfect' : quality ? 'flip' : 'catch', '', { x: b.x, y: b.y, side: i, quality }); this.burst(b.x, b.y, BIOMES[this.biome].color, perfect ? 16 : quality ? 7 : 3);
+        if (perfect) { this.perfects++; this.shake = 4; }
+        if (quality > .4 && this.lesson === 0) { this.lesson = 1; this.emit('tutorial', 'Good save. Release, then tap again just before contact to choose a stronger route.'); }
       }
     }
 
@@ -223,7 +230,11 @@ export class Game {
         const end = o.x + o.w, surface = o.y + (o.type === 'rail' ? (b.x - o.x) * o.slant * .28 : 0);
         if (b.x > o.x - 8 && b.x < end + 8 && Math.abs(b.y - surface) < b.r + 9 && o.cool === 0) {
           if (o.type === 'break') { o.dead = true; this.addScore(75); this.burst(b.x, o.y, '#e4b4ff', 18); b.vy = 650; this.emit('hit'); }
-          else { b.y = surface + b.r + 10; b.vy = 660; b.vx = o.slant * 170; o.cool = .25; this.emit('hit'); }
+          else {
+            const aimed = o.aim === undefined || Math.sign(b.vx || o.aim) === o.aim;
+            b.y = surface + b.r + 10; b.vy = aimed ? 720 : 360; b.vx = o.slant * (aimed ? 245 : 115); o.cool = .25;
+            this.emit(aimed ? 'route' : 'hit', '', { x: b.x, y: o.y, aimed }); if (aimed) this.shake = 5;
+          }
         }
       } else if (dist < b.r + o.r) {
         if (o.type === 'star') { o.dead = true; this.addScore(35); if (this.room) this.room.collected++; this.burst(x, o.y, '#f7d68b', 6); this.emit('collect'); }
@@ -235,11 +246,11 @@ export class Game {
           b.x = x + nx * (b.r + o.r + 1); b.y = o.y + ny * (b.r + o.r + 1);
           if (o.type === 'mandala') {
             const spin = Math.sin(this.time * 1.8 + o.phase) > 0 ? 1 : -1;
-            b.vx = nx * 250 - ny * 140 * spin; b.vy = Math.max(510, b.vy * .3 + 330);
+            b.vx = nx * 250 - ny * 140 * spin; b.vy = Math.max(410, b.vy * .26 + 250);
           } else if (o.type === 'gate' && !gateOpen) {
-            b.vx = nx * 160; b.vy = Math.max(310, b.vy * .2 + 230); this.emit('gate-wait');
+            b.vx = nx * 160; b.vy = Math.max(260, b.vy * .18 + 185); this.emit('gate-wait');
           } else {
-            b.vx = nx * 260 + (b.x < 210 ? 50 : -50); b.vy = Math.max(420, b.vy * .28 + 250);
+            b.vx = nx * 260 + (b.x < 210 ? 50 : -50); b.vy = Math.max(300, b.vy * .22 + 175);
           }
           o.cool = .22; this.addScore(o.type === 'gate' && gateOpen ? 45 : 20); this.burst(x, o.y, BIOMES[this.biome].color); this.emit(o.type === 'mandala' ? 'mandala' : 'hit'); this.shake = 3;
           if (o.type === 'cat') { o.hits++; if (o.hits >= 2) { o.dead = true; this.freed++; this.addScore(200); this.emit('spirit', 'A cat spirit is free. “I heard him, beyond the summit.”'); this.burst(x, o.y, '#b8f8d8', 30); } }
