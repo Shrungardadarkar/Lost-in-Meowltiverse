@@ -6,7 +6,8 @@ A focused, phone-sized portrait pinball adventure about a cat spirit searching f
 
 ## Play
 
-- Use **left/right arrows** or **A/D** to operate the flippers. An idle flipper catches the orb with a soft inward bounce that loses height. Release, then tap as the orb meets a flipper for the strong directional shot; holding a key is deliberately not a substitute for timing.
+- Use **left/right arrows** or **A/D** to operate the flippers. Release, then tap as the orb meets a flipper: a close tap creates the strongest shot; a late tap is a recovery. Holding a key is deliberately not a substitute for timing.
+- Read the chevrons on bank rails: send the orb into a rail in its displayed direction for a powerful route. The opposite entry is safe but weaker.
 - On mobile, tap either half of the playfield. Both sides support simultaneous touches.
 - The lower side lanes are protected by inward guide rails; the labelled center drain is the only bell-costing route at the base.
 - Press **P** or **Escape** to pause. Enable optional sound with the music button.

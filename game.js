@@ -4,6 +4,7 @@ const $ = id => document.getElementById(id);
 const canvas = $('game'), ctx = canvas.getContext('2d');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 let clock = 0, last = 0, accumulator = 0, audio, sound = false;
+let cinema = { punch: 0, flash: 0, kind: '', x: 210, y: 380, side: 0 };
 const bellSVG = '<svg viewBox="0 0 20 24" fill="none" aria-hidden="true"><path d="M7 4a3 3 0 0 1 6 0M4 10a6 6 0 0 1 12 0v5l2 3H2l2-3z" stroke="currentColor" stroke-width="1.5"/><path d="M8 21h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
 const motion = () => reduced ? 0 : clock;
 
@@ -20,8 +21,15 @@ function overlay(title, text, button, hint = 'TAP A FLIPPER AT CONTACT') {
   $('overlayTitle').innerHTML = title; $('overlayText').textContent = text;
   $('playButton').innerHTML = button + ' <span>↗</span>'; $('overlayHint').textContent = hint; $('overlay').hidden = false;
 }
+function cue(event) {
+  if (reduced) return;
+  const kinetic = { perfect: .18, route: .15, mandala: .13, portal: .25, spirit: .2, hit: .08 }[event.type];
+  if (!kinetic) return;
+  cinema = { punch: kinetic, flash: event.type === 'portal' ? .28 : kinetic * .45, kind: event.type, x: event.value?.x ?? game?.ball.x ?? 210, y: event.value?.y ?? game?.ball.y ?? 380, side: event.value?.side ?? 0 };
+}
 const game = new Game(event => {
   tone(event.type);
+  cue(event);
   if (event.type === 'gameover') overlay('Rest, then<br>return.', 'Your checkpoint is safe.', 'Continue');
   if (event.type === 'adventure') overlay('Adventure<br>healed.', event.text, 'Begin next adventure', 'RESCUE COMPLETE');
   if (event.type === 'summit') overlay('Another<br>universe.', 'A familiar bark carries on.', 'Follow it', 'CONTINUE WHEN YOU WANT TO');
@@ -35,9 +43,9 @@ function circle(x, y, r, fill, stroke, width = 1) { ctx.beginPath(); ctx.arc(x, 
 function line(x, y, ex, ey, color, width = 1) { ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(ex, ey); ctx.strokeStyle = color; ctx.lineWidth = width; ctx.stroke(); }
 function star(x, y, r, color) { ctx.save(); ctx.translate(x, y); ctx.beginPath(); for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4 - Math.PI / 2, radius = i % 2 ? r * .3 : r; ctx.lineTo(Math.cos(a) * radius, Math.sin(a) * radius); } ctx.closePath(); ctx.fillStyle = color; ctx.fill(); ctx.restore(); }
 function paw(x, y, size, color) { ctx.save(); ctx.translate(x, y); ctx.rotate(-.2); ctx.fillStyle = color; ctx.beginPath(); ctx.ellipse(0, 3 * size, 4 * size, 3 * size, 0, 0, 7); ctx.fill(); for (let i = 0; i < 3; i++) circle((i - 1) * 3.8 * size, -2 * size - Math.sin(i * Math.PI / 2) * 2 * size, 1.7 * size, color); ctx.restore(); }
-function cat(x, y, r, evil = false) {
+function cat(x, y, r, evil = false, stretch = 1) {
   const bio = BIOMES[game.biome], tide = game.room?.kind === 'tide' || bio.rhythm === 'flow';
-  ctx.save(); ctx.translate(x, y); ctx.shadowBlur = evil ? 14 : 20; ctx.shadowColor = evil ? '#e679d7' : bio.color;
+  ctx.save(); ctx.translate(x, y); ctx.scale(1 / stretch, stretch); ctx.shadowBlur = evil ? 14 : 20; ctx.shadowColor = evil ? '#e679d7' : bio.color;
   const grad = ctx.createRadialGradient(-r * .4, -r * .5, 1, 0, 0, r); grad.addColorStop(0, evil ? '#bc75cb' : '#effff5'); grad.addColorStop(.55, evil ? '#563263' : tide ? '#76d9e6' : bio.color); grad.addColorStop(1, evil ? '#2c173b' : tide ? '#2e7896' : '#5d8392');
   ctx.beginPath(); ctx.moveTo(-r * .8, -r * .25); ctx.lineTo(-r * .9, -r * 1.1); ctx.lineTo(-r * .28, -r * .8); ctx.quadraticCurveTo(0, -r, r * .32, -r * .8); ctx.lineTo(r * .9, -r * 1.1); ctx.lineTo(r * .8, -r * .25); ctx.arc(0, 0, r, -.25, Math.PI + .25); ctx.closePath(); ctx.fillStyle = grad; ctx.fill(); ctx.strokeStyle = evil ? '#e89cde' : '#d5ffe9'; ctx.lineWidth = 1.2; ctx.stroke(); ctx.shadowBlur = 0;
   ctx.strokeStyle = evil ? '#ffb7db' : '#263e47'; ctx.lineWidth = 1.7; ctx.lineCap = 'round'; for (const sign of [-1, 1]) { ctx.beginPath(); ctx.moveTo(sign * r * .26 - r * .13, -r * .12); ctx.lineTo(sign * r * .26 + r * .13, -r * .12 + (evil ? sign * 2 : 0)); ctx.stroke(); } ctx.beginPath(); ctx.moveTo(-2, r * .25); ctx.quadraticCurveTo(0, r * .4, 2, r * .25); ctx.stroke(); if (!evil) circle(0, r + 2, 2.5, '#f4d189'); ctx.restore();
@@ -74,20 +82,26 @@ function background() {
   for (let i = 0; i < 5; i++) { const y = H - ((i * 165 + 100 - game.camera) % 825 + 825) % 825; paw(200 + Math.sin(i * 2) * 55, y, .55, '#e5c98d38'); }
 }
 function draw() {
-  ctx.clearRect(0, 0, W, H); ctx.save(); if (!reduced && game.shake > 1) ctx.translate(Math.sin(clock * 120) * game.shake * .4, Math.cos(clock * 95) * game.shake * .3); background();
+  ctx.clearRect(0, 0, W, H); ctx.save(); const punch = cinema.punch;
+  if (!reduced && punch > .001) { ctx.translate(W / 2, H / 2); ctx.rotate(Math.sin(clock * 95) * punch * .085); ctx.scale(1 + punch * .12, 1 + punch * .12); ctx.translate(-W / 2, -H / 2); }
+  if (!reduced && game.shake > 1) ctx.translate(Math.sin(clock * 120) * game.shake * .4, Math.cos(clock * 95) * game.shake * .3); background();
   const bio = BIOMES[game.biome], sy = y => H - (y - game.camera); drawGuards(sy); drawDrain(sy);
   for (const o of game.objects) {
     const y = sy(o.y); if (o.dead || y < -110 || y > H + 110) continue; let x = o.x, pulse = 1 + Math.sin(motion() * 2 + o.y) * .04;
     if (o.type === 'flow') { flow(o.x, sy(o.y + o.h), o.w, o.h, o.dir); continue; }
     if (o.type === 'bumper') { ctx.save(); ctx.translate(x, y); ctx.rotate(motion() * .12); circle(0, 0, o.r + 8, null, bio.accent + '30'); for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3; circle(Math.cos(a) * (o.r + 8), Math.sin(a) * (o.r + 8), 2, bio.accent + '99'); } ctx.shadowBlur = o.cool > 0 ? 30 : 10; ctx.shadowColor = bio.color; circle(0, 0, o.r * pulse, bio.color + '16', bio.color + 'aa', 1.5); circle(0, 0, o.r - 7, '#231b39', bio.color + '40'); star(0, 0, 10, bio.color); ctx.restore(); }
     if (o.type === 'mandala') mandala(x, y, o.r, o.phase); if (o.type === 'gate') gate(x, y, o.r, o.phase); if (o.type === 'star') star(x, y, 6 + Math.sin(motion() * 3 + o.y), '#f3d592'); if (o.type === 'portal' && !o.used) portal(x, y, o.r, o.kind); if (o.type === 'exit') portal(x, y, o.r, 'exit');
-    if (o.type === 'rail') { ctx.save(); ctx.lineCap = 'round'; line(x, y, x + o.w, y - o.w * o.slant * .28, '#27374c', 15); line(x, y - 2, x + o.w, y - o.w * o.slant * .28 - 2, bio.accent + 'd0', 2); for (let i = 0; i < 3; i++) star(x + 15 + i * 22, y - (15 + i * 22) * o.slant * .28, 3, bio.accent); ctx.restore(); }
+    if (o.type === 'rail') { ctx.save(); ctx.lineCap = 'round'; line(x, y, x + o.w, y - o.w * o.slant * .28, '#27374c', 15); line(x, y - 2, x + o.w, y - o.w * o.slant * .28 - 2, bio.accent + 'd0', 2); for (let i = 0; i < 3; i++) { const rx = x + 20 + i * 25, ry = y - (20 + i * 25) * o.slant * .28; ctx.save(); ctx.translate(rx, ry); ctx.rotate(o.aim > 0 ? -.18 : Math.PI + .18); ctx.beginPath(); ctx.moveTo(-5, -4); ctx.lineTo(5, 0); ctx.lineTo(-5, 4); ctx.strokeStyle = bio.color; ctx.lineWidth = 1.5; ctx.stroke(); ctx.restore(); } ctx.restore(); }
     if (o.type === 'cat') { x += Math.sin(game.time * 1.3 + o.y) * 28; circle(x, y, 34, null, '#ef90dd22'); cat(x, y, 21, true); for (let i = 0; i < (o.requiredHits || 3) - o.hits; i++) circle(x + (i - 1) * 8, y + 32, 2.3, '#efb8de'); }
     if (o.type === 'bell') { circle(x, y, 17, null, '#f3d59240'); ctx.fillStyle = '#f3d592'; ctx.font = '22px serif'; ctx.textAlign = 'center'; ctx.fillText('♧', x, y + 7); }
   }
   for (let side = 0; side < 2; side++) { const f = game.flipper(side), y = sy(f.y), ey = sy(f.ey), charged = game.tapWindow[side] > 0; ctx.lineCap = 'round'; ctx.shadowColor = bio.color; ctx.shadowBlur = game.input[side] ? 24 : 8; line(f.x, y, f.ex, ey, '#3f5d68', 22); line(f.x, y - 2, f.ex, ey - 2, charged ? '#fff5cc' : game.input[side] ? '#dcffe9' : '#b9e8d9', 15); ctx.shadowBlur = 0; line(f.x, y - 5, f.ex, ey - 5, '#f0fff688', 2); circle(f.x, y, 7, '#1c2838', '#ccffea', 1); circle(f.x, y, 2, bio.color); }
-  const b = game.ball; for (let i = b.trail.length - 1; i >= 0; i--) { const p = b.trail[i]; circle(p.x, sy(p.y), b.r * (1 - i / 24) * .8, bio.color + Math.floor((1 - i / 23) * 35).toString(16).padStart(2, '0')); } cat(b.x, sy(b.y), b.r);
-  for (const p of game.particles) { ctx.globalAlpha = Math.max(0, p.life); star(p.x, sy(p.y), 3 * p.life, p.color); } ctx.globalAlpha = 1; if (game.state === 'ready') { mandala(210, 222, 42, 0); portal(92, 278, 30, 'tide'); cat(295, 206, 19); } ctx.restore();
+  const b = game.ball, ballY = sy(b.y); for (let i = b.trail.length - 1; i >= 0; i--) { const p = b.trail[i]; circle(p.x, sy(p.y), b.r * (1 - i / 24) * .8, bio.color + Math.floor((1 - i / 23) * 35).toString(16).padStart(2, '0')); }
+  if (!reduced && (Math.abs(b.vy) > 600 || punch > .05)) { ctx.save(); ctx.translate(b.x, ballY); ctx.rotate(Math.atan2(-b.vy, b.vx)); ctx.globalAlpha = .26 + punch; ctx.strokeStyle = bio.color; for (let i = -2; i <= 2; i++) line(-40 - Math.abs(b.vy) / 45, i * 8, -10, i * 5, bio.color, i === 0 ? 2 : 1); ctx.restore(); }
+  const stretch = 1 + Math.min(.24, Math.abs(b.vy) / 2100) + punch * .18; cat(b.x, ballY, b.r, false, stretch);
+  for (const p of game.particles) { ctx.globalAlpha = Math.max(0, p.life); star(p.x, sy(p.y), 3 * p.life, p.color); } ctx.globalAlpha = 1;
+  if (!reduced && cinema.flash > .01) { ctx.globalAlpha = cinema.flash; ctx.fillStyle = cinema.kind === 'portal' ? '#e7b4ff' : bio.color; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; }
+  if (game.state === 'ready') { mandala(210, 222, 42, 0); portal(92, 278, 30, 'tide'); cat(295, 206, 19); } ctx.restore();
 }
 let lastUI = '';
 function ui() {
@@ -95,7 +109,7 @@ function ui() {
   $('bells').innerHTML = Array.from({ length: 7 }, (_, i) => '<span class="bell ' + (i >= game.lives ? 'lost' : '') + '">' + bellSVG + '</span>').join(''); $('bells').setAttribute('aria-label', game.lives + ' lives remaining'); $('height').innerHTML = String(Math.floor(game.maxHeight / 10)).padStart(4, '0') + '<span> m</span>';
   $('biomeName').textContent = game.room ? (game.room.kind === 'tide' ? 'LIQUID MOON · 3 STARDUST → PULSE' : 'THE HOURS BETWEEN · 3 STARDUST → PULSE') : BIOMES[game.biome].name + ' · RESCUE ' + game.rescuedInAdventure + '/' + game.rescueTarget + (game.rescueBoost ? ' · ✦ PULSE' : ''); $('biomeDot').style.background = BIOMES[game.biome].color;
 }
-function frame(now) { const dt = Math.min((now - last) / 1000 || 0, .05); last = now; clock += dt; accumulator += dt; while (accumulator >= 1 / 120) { game.step(1 / 120); accumulator -= 1 / 120; } draw(); ui(); requestAnimationFrame(frame); }
+function frame(now) { const dt = Math.min((now - last) / 1000 || 0, .05); last = now; clock += dt; cinema.punch = Math.max(0, cinema.punch - dt * 2.8); cinema.flash = Math.max(0, cinema.flash - dt * 4.8); accumulator += dt; while (accumulator >= 1 / 120) { game.step(1 / 120); accumulator -= 1 / 120; } draw(); ui(); requestAnimationFrame(frame); }
 requestAnimationFrame(frame);
 function clearInput() { game.input = [false, false]; document.querySelectorAll('.touch-controls button').forEach(el => el.classList.remove('active')); }
 function pause() { if (game.state === 'playing') { game.state = 'paused'; clearInput(); overlay('Paused', 'Your checkpoint is safe.', 'Resume'); } else if (game.state === 'paused') { game.state = 'playing'; $('overlay').hidden = true; } }

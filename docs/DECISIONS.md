@@ -44,6 +44,14 @@ Each adventure asks for two visible possessed-cat rescues. A cat takes three pin
 
 The prototype presents one phone-sized playfield, not a dashboard. Routine feedback must be embedded in the ball, geometry, color, sound, and motion instead of toast notifications, persistent rule copy, activity feeds, score counters, or side-panel progression. A short overlay is reserved for an intentional start, pause, full loss, or false summit.
 
+## 2026-09-26 — Momentum must be earned through a readable route
+
+A close flipper tap creates a powerful launch, while a late tap is a smaller recovery. Chevron rails advertise a lateral direction: entering on that vector creates a strong bank; entering against it is safe but weak. Bumpers, gates, and lower guide rails preserve play but must not carry the climb by themselves. This protects player agency and gives every high ascent an understandable cause.
+
+## 2026-09-26 — Kinetic animation punctuates commitment
+
+Perfect flips, correctly aimed bank shots, portal crossings, spirit releases, and mandala redirects may use short Japanese-animation-inspired squash-and-stretch, speed lines, impact zoom, and color accents. They must last only long enough to punctuate the action, never obscure the orb or flippers, and reduce to stable visual cues under reduced motion.
+
 ## 2026-09-26 — Repository context is part of the product
 
 `AGENTS.md`, `docs/`, room cards, the changelog, and the PR template are maintained with the code. GitHub is the intended public source of truth once repository write access is available.
