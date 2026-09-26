@@ -31,8 +31,8 @@ export class Game {
       this.generated+=250;
     }
   }
-  gainLife(reason) { if(this.lives<7){this.lives++;this.emit('bell',reason+' · +1 collar bell');}else{this.score+=100;this.emit('bell','Seven bells full · +100 stardust');} }
-  addScore(n) { const before=Math.floor(this.score/1500);this.score+=n;if(Math.floor(this.score/1500)>before)this.gainLife('A lucky constellation'); }
+  gainLife(reason) { if(this.lives<7){this.lives++;this.emit('bell',reason+' · +1 collar bell');}else{this.emit('bell','Your seven collar bells are already whole.');} }
+  addScore(n) { this.score+=n; }
   burst(x,y,color,n=14) { for(let i=0;i<n;i++){const a=i/n*Math.PI*2;this.particles.push({x,y,vx:Math.cos(a)*(40+Math.random()*100),vy:Math.sin(a)*120,life:1,color});} }
   enterRoom(portal) {
     if(this.room)return;
@@ -42,7 +42,7 @@ export class Game {
     for(let i=0;i<5;i++){const x=i%2?300:120;this.objects.push({type:'bumper',x,y:260+i*160,r:27,cool:0});this.objects.push({type:'star',x:420-x,y:300+i*160,r:12});}
     this.objects.push({type:'exit',x:210,y:1050,r:38});
     this.camera=0;this.launch();this.seen.add(portal.kind);
-    this.emit('portal',portal.kind==='tide'?'LIQUID MOON · low gravity + flowing currents':'THE HOURS BETWEEN · time moves at half speed');
+    this.emit('portal',portal.kind==='tide'?'LIQUID MOON · low gravity + flowing currents · collect 3 stardust to restore a bell':'THE HOURS BETWEEN · time moves at half speed · collect 3 stardust to restore a bell');
   }
   exitRoom() {
     const room=this.room;if(!room)return;

@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping this little cat find its friend.
+Thanks for helping this little cat find its friend. Read [AGENTS.md](AGENTS.md), [project context](docs/PROJECT_CONTEXT.md), and [the behavioral design charter](docs/BEHAVIORAL_DESIGN.md) before starting design or implementation work.
 
 ## Work on a change
 
@@ -8,7 +8,7 @@ Thanks for helping this little cat find its friend.
 2. Create a branch for your change.
 3. Run `npm start` and test at http://localhost:4173 with keyboard and a narrow portrait viewport.
 4. Run `npm test` before submitting a pull request. Add a simulation regression test when changing physics or progression rules.
-5. Describe the player-visible change, how you tested it, and any known limitations. Include a screenshot or short recording for visual changes when useful.
+5. Use the pull request template. Describe the player-visible and behavioral-design impact, how you tested it, the documentation updated, and any known limitations. Include a screenshot or short recording for visual changes when useful.
 
 Keep pull requests focused. Discuss major architecture or multiplayer changes in an issue first. Do not commit credentials, generated dependencies, or unrelated files.
 
@@ -21,7 +21,7 @@ Keep pull requests focused. Discuss major architecture or multiplayer changes in
 - Discovery and the search for the lost dog take priority over score in solo play.
 - Touch and keyboard are equally important.
 
-See [the game design](GAME_DESIGN.md) for the broader direction. The current prototype implements only a subset.
+See [the game design](GAME_DESIGN.md), [the project context](docs/PROJECT_CONTEXT.md), and [agent orchestration](docs/ORCHESTRATION.md) for the broader direction. The current prototype implements only a subset.
 
 ## Report a bug or suggest a room
 

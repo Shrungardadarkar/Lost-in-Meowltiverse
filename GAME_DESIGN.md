@@ -43,7 +43,7 @@ The first prototype ends at a glorious apparent summit. Reaching it reveals that
 - A meaningful ascent segment lasts roughly **1–2 minutes**.
 - The run begins with **seven lives**, shown as collar bells.
 - Falling below the active recovery threshold removes one bell and respawns the flippers and orb at the previous safe elevation.
-- Extra bells are surprise rewards, earned through score thresholds, hidden discoveries, and difficult room completions.
+- Extra bells are explicit recovery rewards, earned through marked bells, clearly disclosed room objectives, and authored discoveries with learnable conditions.
 - The counter can never exceed seven bells.
 - A full loss returns the player to the current biome checkpoint rather than erasing all campaign progress.
 
@@ -94,7 +94,7 @@ Possessed cats function as themed pinball encounters, not platform-combat charac
 
 ### Scoring and collectibles
 
-Single-player prioritizes discoveries over leaderboard optimization. Score still rewards precision, device chains, collections, secret-room completions, and extra-life opportunities.
+Single-player prioritizes discoveries over leaderboard optimization. Score still recognizes precision, device chains, collections, and secret-room completions, but never grants lives or gates story, recovery, or progression.
 
 Score design must never make an unskilled player unable to reach the story path. It primarily creates optional mastery goals for replay and becomes a major competitive/resource system in the future multiplayer expansion.
 
@@ -174,7 +174,7 @@ A portrait web game playable with touch and left/right arrow keys. The prototype
 - one baseline climb biome with 6–10 modular room pieces;
 - two portal pocket dimensions with distinct temporary rules;
 - one possessed-cat encounter that transforms into a free spirit;
-- score, a small collectible set, and one surprise extra-life condition;
+- score, a small collectible set, and clearly disclosed bell-recovery objectives;
 - a false-summit ending sequence;
 - keyboard and touch controls.
 

@@ -9,8 +9,8 @@ A portrait pinball adventure about a cat spirit searching for its lost dog frien
 - Use **left/right arrows** or **A/D** to operate the flippers.
 - On mobile, tap or hold either half of the playfield. Both sides support simultaneous touches.
 - Press **P** or **Escape** to pause. Enable optional sound with the music button.
-- Hit glowing portals to enter low-gravity/current or slow-time rooms. Exit through the return ring or automatically after 30 seconds.
-- Hit possessed cats twice to free them. Collect stardust and hidden bells; lives never exceed seven.
+- Hit glowing portals to enter low-gravity/current or slow-time rooms. Collect three visible stardust in a room to restore one bell, then exit through the return ring or automatically after 30 seconds.
+- Hit possessed cats twice to free them. Marked bells restore a life; lives never exceed seven.
 - Each 150 displayed meters reaches a biome checkpoint. At zero bells, continue from that checkpoint. The false summit is at 450 meters, followed by another universe.
 
 ## Develop locally
