@@ -1,6 +1,6 @@
 # Lost in Meowltiverse
 
-A portrait pinball adventure about a cat spirit searching for its lost dog friend. Seven collar-bell lives, floating flippers, strange pocket dimensions, and a summit that is only the beginning.
+A focused, phone-sized portrait pinball adventure about a cat spirit searching for its lost dog friend. Seven collar-bell lives, floating flippers, strange pocket dimensions, and a summit that is only the beginning.
 
 **[Play in your browser](https://shrungardadarkar.github.io/Lost-in-Meowltiverse/)** · [Game design document](GAME_DESIGN.md) · [Contributing](CONTRIBUTING.md)
 
