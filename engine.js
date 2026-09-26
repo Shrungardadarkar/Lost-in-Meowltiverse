@@ -1,130 +1,259 @@
 export const W = 420, H = 760;
 export const BIOMES = [
-  { name: 'CHROME ROOT', color: '#b8f8d8', accent: '#c39cff', bg: '#1b1430', story: 'A golden pawprint. He was here.' },
-  { name: 'TIDE CATHEDRAL', color: '#7ce7ed', accent: '#fa9bd1', bg: '#102b38', story: 'A familiar bark echoes through the water.' },
-  { name: 'CLOCKWORK BLOOM', color: '#f5d08e', accent: '#fb9dae', bg: '#302038', story: 'His favorite ball, caught between seconds.' }
+  { name: 'CHROME ROOT', color: '#b8f8d8', accent: '#c39cff', bg: '#15152b', mid: '#20324a', low: '#111124', story: 'A golden pawprint. He was here.', rhythm: 'catch' },
+  { name: 'TIDE CATHEDRAL', color: '#79e9e3', accent: '#ff9dca', bg: '#092e42', mid: '#135264', low: '#071c34', story: 'A familiar bark echoes through the water.', rhythm: 'flow' },
+  { name: 'CLOCKWORK BLOOM', color: '#f6d28c', accent: '#fa9db9', bg: '#38213f', mid: '#5a3049', low: '#20152f', story: 'His favorite ball, caught between seconds.', rhythm: 'rhythm' }
 ];
+
+const SAVE_KEY = 'lost-in-meowltiverse.checkpoint.v1';
 const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
-function random(seed) { let s=seed>>>0; return ()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296;}; }
+const segmentHit = (p, a, b) => {
+  const dx = b.x - a.x, dy = b.y - a.y;
+  const t = clamp(((p.x - a.x) * dx + (p.y - a.y) * dy) / (dx * dx + dy * dy), 0, 1);
+  const x = a.x + t * dx, y = a.y + t * dy;
+  return { x, y, t, dist: Math.hypot(p.x - x, p.y - y) };
+};
+function random(seed) { let s = seed >>> 0; return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; }
+
 export class Game {
-  constructor(onEvent = ()=>{}) { this.onEvent=onEvent; this.reset(); }
-  emit(type, text, value) { this.onEvent({type,text,value}); }
+  constructor(onEvent = () => {}) { this.onEvent = onEvent; this.reset(); }
+  emit(type, text, value) { this.onEvent({ type, text, value }); }
+
+  readSavedCheckpoint() {
+    try {
+      const saved = JSON.parse(globalThis.localStorage?.getItem(SAVE_KEY) || 'null');
+      return Number.isFinite(saved?.checkpoint) && saved.checkpoint > 0 ? saved : null;
+    } catch { return null; }
+  }
+
+  persistCheckpoint() {
+    try { globalThis.localStorage?.setItem(SAVE_KEY, JSON.stringify({ checkpoint: this.checkpoint, cycle: this.cycle })); } catch { /* local progress is optional */ }
+  }
+
   reset() {
-    this.state='ready';this.camera=0;this.maxHeight=0;this.lives=7;this.score=0;this.freed=0;
-    this.checkpoint=0;this.cycle=0;this.biome=0;this.time=0;this.room=null;this.seen=new Set();
-    this.input=[false,false];this.flips=[0,0];this.strikeLock=0;this.particles=[];this.shake=0;
-    this.objects=[];this.generated=0;this.generate(6000);this.ball={x:210,y:145,vx:0,vy:0,r:13,trail:[]};
+    this.state = 'ready'; this.camera = 0; this.maxHeight = 0; this.lives = 7; this.score = 0; this.freed = 0;
+    this.checkpoint = 0; this.cycle = 0; this.biome = 0; this.time = 0; this.room = null; this.seen = new Set();
+    this.input = [false, false]; this.previousInput = [false, false]; this.tapWindow = [0, 0]; this.flips = [0, 0];
+    this.strikeLock = 0; this.guardLock = 0; this.particles = []; this.shake = 0; this.lesson = 0;
+    this.savedCheckpoint = this.readSavedCheckpoint();
+    this.objects = []; this.generated = 0; this.generate(6000);
+    this.ball = { x: 210, y: 145, vx: 0, vy: 0, r: 13, trail: [] };
   }
-  start() { this.state='playing';this.launch();this.emit('story','Find the golden pawprints. Your friend is up there.'); }
-  launch() { this.ball={x:210,y:this.camera+146,vx:this.time%2>1?-65:65,vy:670,r:13,trail:[]};this.strikeLock=.3; }
+
+  start() {
+    if (this.savedCheckpoint) {
+      this.checkpoint = this.savedCheckpoint.checkpoint; this.cycle = this.savedCheckpoint.cycle || 0;
+      this.maxHeight = this.checkpoint; this.biome = Math.floor(this.checkpoint / 1500) % 3;
+      this.camera = Math.max(0, this.checkpoint - 220);
+      this.emit('story', 'Your quiet checkpoint is waiting. The trail continues when you are ready.');
+    } else this.emit('tutorial', 'Tap a flipper as the spirit falls. A quick tap makes the strong save.');
+    this.state = 'playing'; this.launch();
+  }
+
+  launch() { this.ball = { x: 210, y: this.camera + 146, vx: this.time % 2 > 1 ? -65 : 65, vy: 670, r: 13, trail: [] }; this.strikeLock = .3; }
+
+  buildModule(kind, y, r) {
+    const star = (x, offset = 70) => this.objects.push({ type: 'star', x, y: y + offset, r: 9 });
+    const bumper = (x, offset = 0, radius = 25) => this.objects.push({ type: 'bumper', x, y: y + offset, r: radius, cool: 0 });
+    const rail = (x, offset, w, slant) => this.objects.push({ type: 'rail', x, y: y + offset, w, slant, cool: 0 });
+    if (kind === 'catch-garden') {
+      bumper(145, 0, 24); bumper(275, 20, 24); star(145, 45); star(275, 72); rail(58, 118, 78, 1); rail(284, 150, 78, -1);
+    } else if (kind === 'silver-bank') {
+      rail(42, 18, 116, 1); rail(262, 118, 116, -1); bumper(210, 100, 27); star(108, 95); star(312, 185);
+    } else if (kind === 'pawprint-gate') {
+      this.objects.push({ type: 'gate', x: 210, y: y + 72, r: 27, phase: r() * Math.PI * 2, cool: 0 });
+      bumper(102, 142, 23); bumper(318, 142, 23); star(210, 150); star(210, 198);
+    } else if (kind === 'tide-channel') {
+      this.objects.push({ type: 'flow', x: 65, y: y + 15, w: 290, h: 175, dir: r() > .5 ? 1 : -1, strength: 250 });
+      bumper(120, 55, 24); bumper(300, 135, 24); star(205, 80); star(255, 154); rail(55, 205, 90, 1);
+    } else if (kind === 'tide-choir') {
+      this.objects.push({ type: 'flow', x: 40, y: y + 25, w: 340, h: 125, dir: -1, strength: 190 });
+      bumper(210, 75, 30); star(125, 145); star(210, 175); star(295, 145); rail(286, 210, 85, -1);
+    } else if (kind === 'moon-door') {
+      this.objects.push({ type: 'portal', x: r() > .5 ? 92 : 328, y: y + 95, r: 34, kind: 'tide', cool: 0 });
+      this.objects.push({ type: 'flow', x: 62, y: y + 155, w: 296, h: 64, dir: r() > .5 ? -1 : 1, strength: 160 });
+      bumper(210, 160, 25); star(210, 215);
+    } else if (kind === 'mandala-bloom') {
+      this.objects.push({ type: 'mandala', x: 210, y: y + 88, r: 40, phase: r() * Math.PI * 2, cool: 0 });
+      star(125, 75); star(295, 75); rail(42, 175, 90, 1); rail(288, 175, 90, -1);
+    } else if (kind === 'clock-gate') {
+      this.objects.push({ type: 'gate', x: 210, y: y + 60, r: 30, phase: r() * Math.PI * 2, cool: 0 });
+      this.objects.push({ type: 'mandala', x: 120, y: y + 165, r: 30, phase: r() * Math.PI * 2, cool: 0 });
+      star(300, 120); star(210, 210); rail(280, 215, 86, -1);
+    } else if (kind === 'time-door') {
+      this.objects.push({ type: 'portal', x: r() > .5 ? 92 : 328, y: y + 95, r: 34, kind: 'time', cool: 0 });
+      this.objects.push({ type: 'gate', x: 210, y: y + 185, r: 25, phase: r() * Math.PI * 2, cool: 0 }); star(210, 145);
+    } else if (kind === 'spirit-rescue') {
+      this.objects.push({ type: 'cat', x: 210 + (r() - .5) * 150, y: y + 76, r: 25, hits: 0, cool: 0 });
+      bumper(92, 150, 23); bumper(328, 150, 23); star(210, 160); star(210, 210);
+    } else {
+      bumper(210, 60, 27); star(160, 120); star(260, 150); rail(52, 185, 86, 1);
+    }
+  }
+
   generate(top) {
-    while(this.generated<top) {
-      const i=this.generated/250, y=this.generated+320, r=random(i+17+this.cycle*71);
-      const x=90+r()*240;
-      this.objects.push({type:'bumper',x,y,r:23+r()*8,cool:0,variant:i%3});
-      if(i%2===0)this.objects.push({type:'rail',x:i%4===0?45:300,y:y+100,w:75,slant:i%4===0?1:-1,cool:0});
-      for(let j=0;j<3;j++)this.objects.push({type:'star',x:clamp(x+(j-1)*34,35,385),y:y+70+j*16,r:9});
-      if(i%6===2)this.objects.push({type:'portal',x:i%12===2?82:338,y:y+105,r:34,kind:i%12===2?'tide':'time',cool:0});
-      if(i%6===4)this.objects.push({type:'cat',x:210+(r()-.5)*200,y:y+65,r:25,hits:0,cool:0});
-      if(i%6===3)this.objects.push({type:'break',x:140,y:y+85,w:140,r:10,cool:0});
-      if(i%6===5)this.objects.push({type:'bell',x:210,y:y+40,r:12});
-      this.generated+=250;
+    const plans = [
+      ['catch-garden', 'silver-bank', 'pawprint-gate', 'spirit-rescue', 'moon-door'],
+      ['tide-channel', 'tide-choir', 'moon-door', 'spirit-rescue', 'tide-channel'],
+      ['mandala-bloom', 'clock-gate', 'time-door', 'spirit-rescue', 'mandala-bloom']
+    ];
+    while (this.generated < top) {
+      const index = Math.floor(this.generated / 300), y = this.generated + 330;
+      const biome = Math.floor(y / 1500) % 3, plan = plans[biome][index % plans[biome].length];
+      this.buildModule(plan, y, random(index + 17 + this.cycle * 71));
+      if (index % 7 === 6) this.objects.push({ type: 'bell', x: 210, y: y + 235, r: 12 });
+      this.generated += 300;
     }
   }
-  gainLife(reason) { if(this.lives<7){this.lives++;this.emit('bell',reason+' · +1 collar bell');}else{this.emit('bell','Your seven collar bells are already whole.');} }
-  addScore(n) { this.score+=n; }
-  burst(x,y,color,n=14) { for(let i=0;i<n;i++){const a=i/n*Math.PI*2;this.particles.push({x,y,vx:Math.cos(a)*(40+Math.random()*100),vy:Math.sin(a)*120,life:1,color});} }
+
+  gainLife(reason) { if (this.lives < 7) { this.lives++; this.emit('bell', reason + ' · +1 collar bell'); } else this.emit('bell', 'Your seven collar bells are already whole.'); }
+  addScore(n) { this.score += n; }
+  burst(x, y, color, n = 14) { for (let i = 0; i < n; i++) { const a = i / n * Math.PI * 2; this.particles.push({ x, y, vx: Math.cos(a) * (40 + Math.random() * 100), vy: Math.sin(a) * 120, life: 1, color }); } }
+
   enterRoom(portal) {
-    if(this.room)return;
-    portal.used=true;
-    this.room={kind:portal.kind,returnY:this.ball.y+120,camera:this.camera,objects:this.objects,elapsed:0,collected:0};
-    this.objects=[];
-    for(let i=0;i<5;i++){const x=i%2?300:120;this.objects.push({type:'bumper',x,y:260+i*160,r:27,cool:0});this.objects.push({type:'star',x:420-x,y:300+i*160,r:12});}
-    this.objects.push({type:'exit',x:210,y:1050,r:38});
-    this.camera=0;this.launch();this.seen.add(portal.kind);
-    this.emit('portal',portal.kind==='tide'?'LIQUID MOON · low gravity + flowing currents · collect 3 stardust to restore a bell':'THE HOURS BETWEEN · time moves at half speed · collect 3 stardust to restore a bell');
+    if (this.room) return;
+    portal.used = true;
+    this.room = { kind: portal.kind, returnY: this.ball.y + 120, camera: this.camera, objects: this.objects, elapsed: 0, collected: 0 };
+    this.objects = [];
+    for (let i = 0; i < 5; i++) {
+      const x = portal.kind === 'tide' ? (i % 2 ? 292 : 128) : (i % 2 ? 255 : 165);
+      this.objects.push({ type: portal.kind === 'tide' ? 'bumper' : 'mandala', x, y: 260 + i * 160, r: portal.kind === 'tide' ? 27 : 25, phase: i, cool: 0 });
+      this.objects.push({ type: 'star', x: 420 - x, y: 300 + i * 160, r: 12 });
+      if (portal.kind === 'tide') this.objects.push({ type: 'flow', x: 45, y: 235 + i * 160, w: 330, h: 90, dir: i % 2 ? 1 : -1, strength: 180 });
+      else this.objects.push({ type: 'gate', x: 210, y: 340 + i * 160, r: 18, phase: i, cool: 0 });
+    }
+    this.objects.push({ type: 'exit', x: 210, y: 1050, r: 38 });
+    this.camera = 0; this.launch(); this.seen.add(portal.kind);
+    this.emit('portal', portal.kind === 'tide' ? 'LIQUID MOON · follow the visible currents · collect 3 stardust for a bell' : 'THE HOURS BETWEEN · wait for each clock gate to bloom · collect 3 stardust for a bell');
   }
+
   exitRoom() {
-    const room=this.room;if(!room)return;
-    this.objects=room.objects;this.camera=Math.max(room.camera,room.returnY-420);this.room=null;
-    this.ball={x:210,y:room.returnY,vx:0,vy:600,r:13,trail:[]};
-    if(room.collected>=3)this.gainLife('The room left you a gift');
-    this.addScore(250);this.emit('story','Another world discovered. The trail continues.');
+    const room = this.room; if (!room) return;
+    this.objects = room.objects; this.camera = Math.max(room.camera, room.returnY - 420); this.room = null;
+    this.ball = { x: 210, y: room.returnY, vx: 0, vy: 600, r: 13, trail: [] };
+    if (room.collected >= 3) this.gainLife('You completed the pocket world');
+    this.addScore(250); this.emit('story', 'Another world discovered. The trail continues.');
   }
+
   loseLife() {
-    if(this.room){this.objects=this.room.objects;this.camera=this.room.camera;this.room=null;}
-    this.lives--;this.shake=12;
-    if(this.lives<=0){this.lives=0;this.state='gameover';this.emit('gameover','Even little spirits need a second chance.');return;}
-    this.launch();this.emit('lost','One bell fades. Your ascent is safe.');
+    if (this.room) { this.objects = this.room.objects; this.camera = this.room.camera; this.room = null; }
+    this.lives--; this.shake = 12;
+    if (this.lives <= 0) { this.lives = 0; this.state = 'gameover'; this.emit('gameover', 'Even little spirits need a second chance.'); return; }
+    this.launch(); this.emit('lost', 'One bell fades. The side rails will guide your next save inward.');
   }
-  continueCheckpoint() {this.lives=7;this.camera=Math.max(0,this.checkpoint-220);this.maxHeight=this.checkpoint;this.biome=Math.floor(this.checkpoint/1500)%3;this.state='playing';this.launch();}
-  continueEndless() {this.cycle++;this.state='playing';this.generate(this.maxHeight+6000);this.launch();this.emit('story','Universe '+(this.cycle+1)+' · That bark is still a little further.');}
+
+  continueCheckpoint() { this.lives = 7; this.camera = Math.max(0, this.checkpoint - 220); this.maxHeight = this.checkpoint; this.biome = Math.floor(this.checkpoint / 1500) % 3; this.state = 'playing'; this.launch(); }
+  continueEndless() { this.cycle++; this.state = 'playing'; this.generate(this.maxHeight + 6000); this.launch(); this.emit('story', 'Universe ' + (this.cycle + 1) + ' · That bark is still a little further.'); }
+
   flipper(side) {
-    const f=this.flips[side],angle=-.36+f*.88,sign=side===0?1:-1;
-    const x=side===0?105:315,y=this.camera+106;
-    return {x,y,ex:x+sign*Math.cos(angle)*80,ey:y+Math.sin(angle)*80};
+    const f = this.flips[side], angle = -.36 + f * .88, sign = side === 0 ? 1 : -1;
+    const x = side === 0 ? 105 : 315, y = this.camera + 106;
+    return { x, y, ex: x + sign * Math.cos(angle) * 80, ey: y + Math.sin(angle) * 80 };
   }
+
+  guards() {
+    return [
+      { side: 0, a: { x: 63, y: this.camera + 70 }, b: { x: 25, y: this.camera + 242 } },
+      { side: 1, a: { x: 357, y: this.camera + 70 }, b: { x: 395, y: this.camera + 242 } }
+    ];
+  }
+
+  applyGuardRails(b) {
+    if (this.guardLock > 0) return;
+    for (const guard of this.guards()) {
+      const hit = segmentHit(b, guard.a, guard.b), inward = guard.side === 0 ? 1 : -1;
+      const isInside = guard.side === 0 ? b.x > hit.x : b.x < hit.x;
+      if (isInside && hit.dist < b.r + 8 && b.vy < 120) {
+        b.x = hit.x + inward * (b.r + 9); b.y = hit.y;
+        b.vx = inward * Math.max(150, Math.abs(b.vx) * .45 + 105); b.vy = Math.max(140, b.vy * .18 + 95);
+        this.guardLock = .12; this.addScore(10); this.emit('rail'); this.burst(hit.x, hit.y, BIOMES[this.biome].color, 8); return;
+      }
+    }
+  }
+
+  applyEnvironments(b, h) {
+    for (const o of this.objects) {
+      if (o.type !== 'flow' || b.x < o.x || b.x > o.x + o.w || b.y < o.y || b.y > o.y + o.h) continue;
+      b.vx += (o.dir * o.strength + Math.sin(this.time * 1.7 + b.y / 105) * 42) * h;
+      b.vy += Math.cos(this.time * 1.3 + b.x / 85) * 24 * h;
+    }
+  }
+
   step(dt) {
-    if(this.state!=='playing')return;
-    this.time+=dt;this.shake*=.9;this.strikeLock=Math.max(0,this.strikeLock-dt);
-    for(let i=0;i<2;i++)this.flips[i]+=((this.input[i]?1:0)-this.flips[i])*Math.min(1,dt*24);
-    const b=this.ball;
-    if(this.room){this.room.elapsed+=dt;if(this.room.elapsed>30){this.exitRoom();return;}}
-    const speed=this.room?.kind==='time'?.58:1;
-    const h=dt*speed;
-    b.vy-=(this.room?.kind==='tide'?370:620)*h;
-    if(this.room?.kind==='tide')b.vx+=Math.sin(this.time*1.5+b.y/170)*170*h;
-    b.vx*=Math.pow(.998,h*120);b.vx=clamp(b.vx,-440,440);b.vy=clamp(b.vy,-1000,1050);
-    b.x+=b.vx*h;b.y+=b.vy*h;
-    if(b.x<b.r+18){b.x=b.r+18;b.vx=Math.abs(b.vx)*.83;}
-    if(b.x>W-b.r-18){b.x=W-b.r-18;b.vx=-Math.abs(b.vx)*.83;}
-    for(let i=0;i<2;i++) {
-      const f=this.flipper(i),dx=f.ex-f.x,dy=f.ey-f.y;
-      const t=clamp(((b.x-f.x)*dx+(b.y-f.y)*dy)/(dx*dx+dy*dy),0,1);
-      const px=f.x+t*dx,py=f.y+t*dy,dist=Math.hypot(b.x-px,b.y-py);
-      if(dist<b.r+9&&b.y>py-10&&b.vy<200&&this.strikeLock===0) {
-        b.y=py+b.r+10;b.vy=this.input[i]?900:20;
-        b.vx=(i===0?1:-1)*(this.input[i]?(100+t*235):65);this.strikeLock=.13;
-        this.emit('flip');this.burst(b.x,b.y,BIOMES[this.biome].color,7);
+    if (this.state !== 'playing') return;
+    this.time += dt; this.shake *= .9; this.strikeLock = Math.max(0, this.strikeLock - dt); this.guardLock = Math.max(0, this.guardLock - dt);
+    for (let i = 0; i < 2; i++) {
+      if (this.input[i] && !this.previousInput[i]) this.tapWindow[i] = .16;
+      else this.tapWindow[i] = Math.max(0, this.tapWindow[i] - dt);
+      this.previousInput[i] = this.input[i];
+      this.flips[i] += ((this.input[i] ? 1 : 0) - this.flips[i]) * Math.min(1, dt * 24);
+    }
+    const b = this.ball;
+    if (this.room) { this.room.elapsed += dt; if (this.room.elapsed > 30) { this.exitRoom(); return; } }
+    const speed = this.room?.kind === 'time' ? .58 : 1, h = dt * speed;
+    b.vy -= (this.room?.kind === 'tide' ? 370 : 620) * h; this.applyEnvironments(b, h);
+    b.vx *= Math.pow(.998, h * 120); b.vx = clamp(b.vx, -440, 440); b.vy = clamp(b.vy, -1000, 1050);
+    b.x += b.vx * h; b.y += b.vy * h;
+    if (b.x < b.r + 18) { b.x = b.r + 18; b.vx = Math.abs(b.vx) * .83; }
+    if (b.x > W - b.r - 18) { b.x = W - b.r - 18; b.vx = -Math.abs(b.vx) * .83; }
+    this.applyGuardRails(b);
+
+    for (let i = 0; i < 2; i++) {
+      const f = this.flipper(i), hit = segmentHit(b, f, { x: f.ex, y: f.ey });
+      if (hit.dist < b.r + 9 && b.y > hit.y - 10 && b.vy < 200 && this.strikeLock === 0 && this.tapWindow[i] > 0) {
+        const timed = this.tapWindow[i] > 0;
+        b.y = hit.y + b.r + 10; b.vy = timed ? 900 : 25; b.vx = (i === 0 ? 1 : -1) * (timed ? (105 + hit.t * 240) : 45);
+        this.tapWindow[i] = 0; this.strikeLock = .13; this.emit(timed ? 'flip' : 'catch'); this.burst(b.x, b.y, BIOMES[this.biome].color, timed ? 9 : 4);
+        if (timed && this.lesson === 0) { this.lesson = 1; this.emit('tutorial', 'Good save. Release, then tap again just before contact to choose a stronger route.'); }
       }
     }
-    for(const o of this.objects) {
-      o.cool=Math.max(0,(o.cool||0)-dt);
-      if(o.dead||o.used||Math.abs(o.y-b.y)>130)continue;
-      let x=o.x;
-      if(o.type==='cat')x+=Math.sin(this.time*1.3+o.y)*28;
-      const dx=b.x-x,dy=b.y-o.y,dist=Math.hypot(dx,dy);
-      if(o.type==='rail'||o.type==='break'){
-        const end=o.x+o.w;
-        const surface=o.y+(o.type==='rail'?(b.x-o.x)*o.slant*.28:0);
-        if(b.x>o.x-8&&b.x<end+8&&Math.abs(b.y-surface)<b.r+9&&o.cool===0){
-          if(o.type==='break'){o.dead=true;this.addScore(75);this.burst(b.x,o.y,'#e4b4ff',18);b.vy=650;this.emit('hit');}
-          else{b.y=surface+b.r+10;b.vy=790;b.vx=o.slant*190;o.cool=.25;this.emit('hit');}
+
+    for (const o of this.objects) {
+      o.cool = Math.max(0, (o.cool || 0) - dt);
+      if (o.dead || o.used || Math.abs(o.y - b.y) > 145) continue;
+      let x = o.x; if (o.type === 'cat') x += Math.sin(this.time * 1.3 + o.y) * 28;
+      const dx = b.x - x, dy = b.y - o.y, dist = Math.hypot(dx, dy);
+      if (o.type === 'rail' || o.type === 'break') {
+        const end = o.x + o.w, surface = o.y + (o.type === 'rail' ? (b.x - o.x) * o.slant * .28 : 0);
+        if (b.x > o.x - 8 && b.x < end + 8 && Math.abs(b.y - surface) < b.r + 9 && o.cool === 0) {
+          if (o.type === 'break') { o.dead = true; this.addScore(75); this.burst(b.x, o.y, '#e4b4ff', 18); b.vy = 650; this.emit('hit'); }
+          else { b.y = surface + b.r + 10; b.vy = 660; b.vx = o.slant * 170; o.cool = .25; this.emit('hit'); }
         }
-      } else if(dist<b.r+o.r) {
-        if(o.type==='star'){o.dead=true;this.addScore(35);if(this.room)this.room.collected++;this.burst(x,o.y,'#f7d68b',6);this.emit('collect');}
-        if(o.type==='bell'){o.dead=true;this.gainLife('A hidden gift');this.burst(x,o.y,'#f7d68b');}
-        if(o.type==='portal'){this.enterRoom(o);return;}
-        if(o.type==='exit'){this.exitRoom();return;}
-        if((o.type==='bumper'||o.type==='cat')&&o.cool===0){
-          const nx=dx/(dist||1),ny=dy/(dist||1);
-          b.x=x+nx*(b.r+o.r+1);b.y=o.y+ny*(b.r+o.r+1);
-          b.vx=nx*290+(b.x<210?50:-50);b.vy=Math.max(580,b.vy*.4+380);o.cool=.22;
-          this.addScore(20);this.burst(x,o.y,BIOMES[this.biome].color);this.emit('hit');this.shake=3;
-          if(o.type==='cat'){o.hits++;if(o.hits>=2){o.dead=true;this.freed++;this.addScore(200);this.emit('spirit','A cat spirit is free. “I heard him, beyond the summit.”');this.burst(x,o.y,'#b8f8d8',30);}}
+      } else if (dist < b.r + o.r) {
+        if (o.type === 'star') { o.dead = true; this.addScore(35); if (this.room) this.room.collected++; this.burst(x, o.y, '#f7d68b', 6); this.emit('collect'); }
+        if (o.type === 'bell') { o.dead = true; this.gainLife('You found a marked bell'); this.burst(x, o.y, '#f7d68b'); }
+        if (o.type === 'portal') { this.enterRoom(o); return; }
+        if (o.type === 'exit') { this.exitRoom(); return; }
+        if ((o.type === 'bumper' || o.type === 'cat' || o.type === 'mandala' || o.type === 'gate') && o.cool === 0) {
+          const nx = dx / (dist || 1), ny = dy / (dist || 1), gateOpen = o.type !== 'gate' || Math.sin(this.time * 3.2 + o.phase) > .05;
+          b.x = x + nx * (b.r + o.r + 1); b.y = o.y + ny * (b.r + o.r + 1);
+          if (o.type === 'mandala') {
+            const spin = Math.sin(this.time * 1.8 + o.phase) > 0 ? 1 : -1;
+            b.vx = nx * 250 - ny * 140 * spin; b.vy = Math.max(510, b.vy * .3 + 330);
+          } else if (o.type === 'gate' && !gateOpen) {
+            b.vx = nx * 160; b.vy = Math.max(310, b.vy * .2 + 230); this.emit('gate-wait');
+          } else {
+            b.vx = nx * 260 + (b.x < 210 ? 50 : -50); b.vy = Math.max(420, b.vy * .28 + 250);
+          }
+          o.cool = .22; this.addScore(o.type === 'gate' && gateOpen ? 45 : 20); this.burst(x, o.y, BIOMES[this.biome].color); this.emit(o.type === 'mandala' ? 'mandala' : 'hit'); this.shake = 3;
+          if (o.type === 'cat') { o.hits++; if (o.hits >= 2) { o.dead = true; this.freed++; this.addScore(200); this.emit('spirit', 'A cat spirit is free. “I heard him, beyond the summit.”'); this.burst(x, o.y, '#b8f8d8', 30); } }
         }
       }
     }
-    this.camera+=(Math.max(this.camera,b.y-470)-this.camera)*Math.min(1,dt*6);
-    if(!this.room){
-      this.maxHeight=Math.max(this.maxHeight,b.y-146);
-      const zone=Math.floor(this.maxHeight/1500);
-      if(zone>Math.floor(this.checkpoint/1500)){this.checkpoint=zone*1500;this.biome=zone%3;this.emit('checkpoint',BIOMES[this.biome].story+' · Checkpoint reached');}
-      if(this.maxHeight>=(this.cycle+1)*4500){this.state='summit';this.emit('summit');}
-      this.generate(this.camera+1800);
+    this.camera += (Math.max(this.camera, b.y - 470) - this.camera) * Math.min(1, dt * 6);
+    if (!this.room) {
+      this.maxHeight = Math.max(this.maxHeight, b.y - 146);
+      const zone = Math.floor(this.maxHeight / 1500);
+      if (zone > Math.floor(this.checkpoint / 1500)) {
+        this.checkpoint = zone * 1500; this.biome = zone % 3; this.persistCheckpoint();
+        this.emit('checkpoint', BIOMES[this.biome].story + ' · Checkpoint safe. Pause or leave whenever you like.');
+      }
+      if (this.maxHeight >= (this.cycle + 1) * 4500) { this.persistCheckpoint(); this.state = 'summit'; this.emit('summit'); }
+      this.generate(this.camera + 1800);
     }
-    if(b.y<this.camera-45)this.loseLife();
-    b.trail.unshift({x:b.x,y:b.y});if(b.trail.length>22)b.trail.pop();
-    for(const p of this.particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt*1.6;}this.particles=this.particles.filter(p=>p.life>0);
+    if (b.y < this.camera - 45) this.loseLife();
+    b.trail.unshift({ x: b.x, y: b.y }); if (b.trail.length > 22) b.trail.pop();
+    for (const p of this.particles) { p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt * 1.6; }
+    this.particles = this.particles.filter(p => p.life > 0);
   }
 }

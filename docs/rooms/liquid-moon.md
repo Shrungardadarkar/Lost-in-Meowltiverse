@@ -4,7 +4,7 @@
 
 - **Biome / world rule:** Tide Cathedral portal; low gravity and a visible flowing current.
 - **Player fantasy:** Drift through a luminous pocket ocean and guide the cat spirit home by reading its current.
-- **Skill practiced:** Hold a controlled flipper shot long enough to redirect a low-gravity arc.
+- **Skill practiced:** Release and tap a controlled flipper shot near contact, then read the current's lateral pull.
 - **Expected session placement:** First portal room in a biome, after a stable main-climb bumper sequence.
 - **Natural stopping relation:** Exit returns to a calm main-climb lane near the next checkpoint; completion can support a satisfied pause.
 

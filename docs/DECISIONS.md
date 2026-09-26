@@ -14,6 +14,22 @@ A collar bell can only be earned by a visible, deterministic action: a marked be
 
 Main-climb physics remain stable. Portal worlds alter one primary rule and communicate it through at least two channels before the player must act.
 
+## 2026-09-26 — Timing, not holding, is the core flipper skill
+
+A flipper receives its strong launch only on a fresh press close to contact. Holding an input is visually allowed for accessibility and catch posture, but cannot repeatedly generate climb energy. This makes the principal skill legible and avoids an autopilot strategy.
+
+## 2026-09-26 — Side lanes guide; the center drain decides
+
+The lower side spaces are protected by diagonal guide rails that redirect a descending orb inward. This preserves traditional pinball's readable lower-playfield geometry without making a near-miss feel arbitrarily expensive. The center drain remains the clearly signaled failure route.
+
+## 2026-09-26 — Living environments are physical, not decorative
+
+Tide flows apply a directional force, Clockwork mandalas alter an exit vector, and rhythm gates visibly open and close. Each effect must be observable before it matters, testable in the simulation, and paired with a calm route around it.
+
+## 2026-09-26 — Checkpoint continuity is voluntary
+
+Safe biome checkpoints can be stored locally as a convenience for a player who chooses to leave. There is no streak, return timer, or penalty for stopping.
+
 ## 2026-09-26 — Repository context is part of the product
 
 `AGENTS.md`, `docs/`, room cards, the changelog, and the PR template are maintained with the code. GitHub is the intended public source of truth once repository write access is available.

@@ -4,7 +4,7 @@
 
 *Lost in Meowltiverse* is a browser-first, portrait pinball climb. A reactive cat-spirit orb searches a strange vertical multiverse for its lost dog friend. The player has only two inputs: left and right flippers. The prototype uses hand-authored object types assembled into a deterministic procedural climb.
 
-The current playable scope includes Chrome Root, Tide Cathedral, Clockwork Bloom, two pocket-dimension rules, possessed cats that become friendly spirits, seven collar bells, biome checkpoints, and a false summit that can continue into another universe.
+The current playable scope includes Chrome Root, Tide Cathedral, Clockwork Bloom, authored climb-module decks, protected lower side rails, tap-timing flippers, living currents, interactive mandalas and rhythm gates, two pocket-dimension rules, possessed cats that become friendly spirits, seven collar bells, local biome checkpoint continuity, and a false summit that can continue into another universe.
 
 ## Current truth in code
 
@@ -22,16 +22,17 @@ The current playable scope includes Chrome Root, Tide Cathedral, Clockwork Bloom
 - Discovery is the primary solo reward; score is secondary and does not gate progress.
 - A fall removes one bell and restarts at the previous safe elevation. A full loss restores the current biome checkpoint.
 - Every portal changes one local rule for a short pocket world and returns the player to stable main-climb physics.
+- Chrome Root teaches catch and bank routes; Tide Cathedral's current changes trajectory; Clockwork Bloom uses mandala redirects and clearly cycling gates.
+- Lower side rails return near-misses to the playfield; timing a fresh flipper tap at contact is the core climb skill.
 - The game is surreal and psychedelic, but visual anomaly must clarify rather than disguise the active physics rule.
 - The dog trail and released cat spirits create the emotional through-line.
 
 ## Near-term roadmap
 
-1. Replace broad procedural repetition with authored room cards and tested module selection.
-2. Add a natural biome-rest beat and an intentional session close.
-3. Improve portal teaching, animation readability, and reduced-motion variants.
-4. Run short observational playtests and tune challenge from evidence.
-5. Add persistent save only after the session loop is proven.
+1. Turn the implemented module deck patterns into full reviewed room cards and introduce a natural biome-rest beat.
+2. Run short observational playtests and tune tap timing, side-rail safety, and portal readability from evidence.
+3. Improve reduced-motion and screen-reader variants while retaining physics clarity.
+4. Add final narrative art and more discovery moments before considering multiplayer.
 
 Read the current evidence and priority order in [the full game review](reviews/2026-09-26-full-game-review.md).
 
