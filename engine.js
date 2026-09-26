@@ -32,7 +32,8 @@ export class Game {
 
   reset() {
     this.state = 'ready'; this.camera = 0; this.maxHeight = 0; this.lives = 7; this.score = 0; this.freed = 0;
-    this.checkpoint = 0; this.safePoint = 0; this.cycle = 0; this.biome = 0; this.time = 0; this.room = null; this.seen = new Set(); this.shield = 0; this.recovering = false;
+    this.checkpoint = 0; this.safePoint = 0; this.cycle = 0; this.biome = 0; this.adventure = 0; this.rescuedInAdventure = 0; this.rescueTarget = 2; this.rescueBoost = 0;
+    this.time = 0; this.room = null; this.seen = new Set(); this.shield = 0; this.recovering = false;
     this.input = [false, false]; this.previousInput = [false, false]; this.tapWindow = [0, 0]; this.flips = [0, 0];
     this.strikeLock = 0; this.guardLock = 0; this.particles = []; this.shake = 0; this.lesson = 0;
     this.savedCheckpoint = this.readSavedCheckpoint();
@@ -43,7 +44,7 @@ export class Game {
   start() {
     if (this.savedCheckpoint) {
       this.checkpoint = this.savedCheckpoint.checkpoint; this.cycle = this.savedCheckpoint.cycle || 0;
-      this.maxHeight = this.checkpoint; this.safePoint = this.checkpoint; this.biome = Math.floor(this.checkpoint / 1500) % 3;
+      this.maxHeight = this.checkpoint; this.safePoint = this.checkpoint; this.adventure = Math.floor(this.checkpoint / 1500); this.biome = this.adventure % 3;
       this.camera = Math.max(0, this.checkpoint - 220);
       this.emit('story', 'Your quiet checkpoint is waiting. The trail continues when you are ready.');
     } else this.emit('tutorial', 'Tap a flipper as the spirit falls. A quick tap makes the strong save.');
@@ -85,7 +86,7 @@ export class Game {
       this.objects.push({ type: 'portal', x: r() > .5 ? 92 : 328, y: y + 95, r: 34, kind: 'time', cool: 0 });
       this.objects.push({ type: 'gate', x: 210, y: y + 185, r: 25, phase: r() * Math.PI * 2, cool: 0 }); star(210, 145);
     } else if (kind === 'spirit-rescue') {
-      this.objects.push({ type: 'cat', x: 210 + (r() - .5) * 150, y: y + 76, r: 25, hits: 0, cool: 0 });
+      this.objects.push({ type: 'cat', x: 210 + (r() - .5) * 150, y: y + 76, r: 25, hits: 0, requiredHits: 3, adventure: Math.floor(y / 1500), cool: 0 });
       bumper(92, 150, 23); bumper(328, 150, 23); star(210, 160); star(210, 210);
     } else {
       bumper(210, 60, 27); star(160, 120); star(260, 150); rail(52, 185, 86, 1);
@@ -94,13 +95,13 @@ export class Game {
 
   generate(top) {
     const plans = [
-      ['catch-garden', 'silver-bank', 'pawprint-gate', 'spirit-rescue', 'moon-door'],
-      ['tide-channel', 'tide-choir', 'moon-door', 'spirit-rescue', 'tide-channel'],
-      ['mandala-bloom', 'clock-gate', 'time-door', 'spirit-rescue', 'mandala-bloom']
+      ['catch-garden', 'spirit-rescue', 'silver-bank', 'pawprint-gate', 'spirit-rescue'],
+      ['tide-channel', 'spirit-rescue', 'tide-choir', 'moon-door', 'spirit-rescue'],
+      ['mandala-bloom', 'spirit-rescue', 'clock-gate', 'time-door', 'spirit-rescue']
     ];
     while (this.generated < top) {
       const index = Math.floor(this.generated / 300), y = this.generated + 330;
-      const biome = Math.floor(y / 1500) % 3, plan = plans[biome][index % plans[biome].length];
+      const biome = Math.floor(y / 1500) % 3, plan = plans[biome][Math.floor((y % 1500) / 300)];
       this.buildModule(plan, y, random(index + 17 + this.cycle * 71));
       if (index % 7 === 6) this.objects.push({ type: 'bell', x: 210, y: y + 235, r: 12 });
       this.generated += 300;
@@ -110,6 +111,24 @@ export class Game {
   gainLife(reason) { if (this.lives < 7) { this.lives++; this.emit('bell', reason + ' · +1 collar bell'); } else this.emit('bell', 'Your seven collar bells are already whole.'); }
   addScore(n) { this.score += n; }
   burst(x, y, color, n = 14) { for (let i = 0; i < n; i++) { const a = i / n * Math.PI * 2; this.particles.push({ x, y, vx: Math.cos(a) * (40 + Math.random() * 100), vy: Math.sin(a) * 120, life: 1, color }); } }
+  completeAdventure() {
+    const completed = BIOMES[this.biome].name;
+    this.checkpoint = (this.adventure + 1) * 1500; this.safePoint = this.checkpoint; this.maxHeight = Math.max(this.maxHeight, this.checkpoint); this.persistCheckpoint();
+    this.adventure++;
+    if (this.adventure >= (this.cycle + 1) * BIOMES.length) { this.state = 'summit'; this.emit('summit'); return; }
+    this.biome = this.adventure % BIOMES.length; this.rescuedInAdventure = 0; this.state = 'adventure-complete';
+    this.emit('adventure', completed + ' healed · two cat spirits are free. Next adventure: ' + BIOMES[this.biome].name + '.');
+  }
+  beginAdventure() { this.camera = Math.max(0, this.adventure * 1500 - (H - 226)); this.state = 'playing'; this.resumeFromRecovery(); this.emit('checkpoint', BIOMES[this.biome].name + ' adventure begins · rescue ' + this.rescueTarget + ' cat spirits.'); }
+  rescueCat(cat, x) {
+    const marks = this.rescueBoost ? 2 : 1;
+    if (this.rescueBoost) { this.rescueBoost = 0; this.emit('booster', 'Portal pulse used · two rescue marks.'); }
+    cat.hits = Math.min(cat.requiredHits || 3, cat.hits + marks);
+    if (cat.hits < (cat.requiredHits || 3)) { this.emit('rescue', 'Rescue pulse · ' + cat.hits + '/' + (cat.requiredHits || 3)); return false; }
+    cat.dead = true; this.freed++; this.rescuedInAdventure++; this.addScore(200); this.emit('spirit', 'A cat spirit is free. “The trail is brighter now.”'); this.burst(x, cat.y, '#b8f8d8', 30);
+    if (this.rescuedInAdventure >= this.rescueTarget) { this.completeAdventure(); return true; }
+    return false;
+  }
 
   enterRoom(portal) {
     if (this.room) return;
@@ -132,7 +151,7 @@ export class Game {
     const room = this.room; if (!room) return;
     this.objects = room.objects; this.camera = Math.max(room.camera, room.returnY - 420); this.room = null;
     this.ball = { x: 210, y: room.returnY, vx: 0, vy: 600, r: 13, trail: [] };
-    if (room.collected >= 3) { this.gainLife('You completed the pocket world'); this.shield = 1; this.emit('shield', 'Spirit Shield gained · it protects your next fall.'); }
+    if (room.collected >= 3) { this.gainLife('You completed the pocket world'); this.shield = 1; this.rescueBoost = 1; this.emit('shield', 'Spirit Shield gained · it protects your next fall.'); this.emit('booster', 'Portal pulse gained · your next cat strike adds two rescue marks.'); }
     this.addScore(250); this.emit('story', 'Another world discovered. The trail continues.');
   }
 
@@ -147,7 +166,7 @@ export class Game {
   }
 
   continueCheckpoint() { this.lives = 7; this.safePoint = this.checkpoint; this.camera = Math.max(0, this.checkpoint - 220); this.maxHeight = this.checkpoint; this.biome = Math.floor(this.checkpoint / 1500) % 3; this.state = 'playing'; this.launch(); this.emit('checkpoint', 'Returning to ' + BIOMES[this.biome].name + ' checkpoint.'); }
-  continueEndless() { this.cycle++; this.state = 'playing'; this.generate(this.maxHeight + 6000); this.launch(); this.emit('story', 'Universe ' + (this.cycle + 1) + ' · That bark is still a little further.'); }
+  continueEndless() { this.cycle++; this.adventure = this.cycle * BIOMES.length; this.biome = this.adventure % BIOMES.length; this.rescuedInAdventure = 0; this.state = 'playing'; this.generate(this.maxHeight + 6000); this.beginAdventure(); this.emit('story', 'Universe ' + (this.cycle + 1) + ' · More cat spirits need your help.'); }
 
   flipper(side) {
     const f = this.flips[side], angle = -.36 + f * .88, sign = side === 0 ? 1 : -1;
@@ -242,7 +261,7 @@ export class Game {
             b.vx = nx * 260 + (b.x < 210 ? 50 : -50); b.vy = Math.max(420, b.vy * .28 + 250);
           }
           o.cool = .22; this.addScore(o.type === 'gate' && gateOpen ? 45 : 20); this.burst(x, o.y, BIOMES[this.biome].color); this.emit(o.type === 'mandala' ? 'mandala' : 'hit'); this.shake = 3;
-          if (o.type === 'cat') { o.hits++; if (o.hits >= 2) { o.dead = true; this.freed++; this.addScore(200); this.emit('spirit', 'A cat spirit is free. “I heard him, beyond the summit.”'); this.burst(x, o.y, '#b8f8d8', 30); } }
+          if (o.type === 'cat' && o.adventure === this.adventure && this.rescueCat(o, x)) return;
         }
       }
     }
@@ -252,12 +271,6 @@ export class Game {
       if (this.recovering && measuredHeight <= this.safePoint) this.recovering = false;
       if (!this.recovering) this.maxHeight = Math.max(this.maxHeight, measuredHeight);
       this.safePoint = Math.max(this.safePoint, Math.floor(this.maxHeight / 250) * 250);
-      const zone = Math.floor(this.maxHeight / 1500);
-      if (zone > Math.floor(this.checkpoint / 1500)) {
-        this.checkpoint = zone * 1500; this.safePoint = Math.max(this.safePoint, this.checkpoint); this.biome = zone % 3; this.persistCheckpoint();
-        this.emit('checkpoint', BIOMES[this.biome].name + ' checkpoint reached · ' + BIOMES[this.biome].story);
-      }
-      if (this.maxHeight >= (this.cycle + 1) * 4500) { this.persistCheckpoint(); this.state = 'summit'; this.emit('summit'); }
       this.generate(this.camera + 1800);
     }
     const crossedCenterDrain = !this.room && b.y < this.camera + 78 && b.x > 158 && b.x < 262;

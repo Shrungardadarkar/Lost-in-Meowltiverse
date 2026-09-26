@@ -11,6 +11,7 @@ All notable player-facing and contributor-facing changes are recorded here. This
 - Reworked the ascent around deliberate release-and-tap flipper timing; held inputs no longer create repeated launch energy.
 - Made idle flippers solid with low-energy inward catches, added an immediate centre-gap drain and visible marker, and clarified the centre-drain bell-loss message.
 - Changed bell-loss recovery so the camera returns to the lower edge of the safe section and the orb visibly falls in from above.
+- Made two three-hit cat rescues the objective for each adventure, added a Portal Pulse booster, and added a calm next-adventure transition.
 - Added protected lower side rails so only the center drain costs a collar bell.
 - Replaced the repeated fixed climb pattern with authored biome module decks: catch gardens, banks, pawprint gates, living tide channels, mandala blooms, and rhythm gates.
 - Added interactive fluid currents, rotating mandalas, and readable time gates, plus distinct living visual language for every biome.

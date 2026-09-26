@@ -10,7 +10,7 @@ const motion = () => reduced ? 0 : clock;
 function tone(kind) {
   if (!sound || !audio) return;
   const osc = audio.createOscillator(), gain = audio.createGain();
-  const pitches = { flip: 190, catch: 115, rail: 280, hit: 340, collect: 740, portal: 110, spirit: 880, bell: 1046, lost: 100, shield: 920, checkpoint: 660, mandala: 510, 'gate-wait': 180 };
+  const pitches = { flip: 190, catch: 115, rail: 280, hit: 340, collect: 740, portal: 110, spirit: 880, rescue: 610, booster: 960, bell: 1046, lost: 100, shield: 920, checkpoint: 660, mandala: 510, 'gate-wait': 180 };
   const pitch = pitches[kind] || 430;
   osc.frequency.setValueAtTime(pitch, audio.currentTime); osc.frequency.exponentialRampToValueAtTime(pitch * (kind === 'lost' ? .65 : 1.35), audio.currentTime + .16);
   osc.type = kind === 'flip' ? 'triangle' : 'sine'; gain.gain.setValueAtTime(.045, audio.currentTime); gain.gain.exponentialRampToValueAtTime(.001, audio.currentTime + .27);
@@ -23,6 +23,7 @@ function overlay(title, text, button, hint = 'TAP A FLIPPER AT CONTACT') {
 const game = new Game(event => {
   tone(event.type);
   if (event.type === 'gameover') overlay('Rest, then<br>return.', 'Your checkpoint is safe.', 'Continue');
+  if (event.type === 'adventure') overlay('Adventure<br>healed.', event.text, 'Begin next adventure', 'RESCUE COMPLETE');
   if (event.type === 'summit') overlay('Another<br>universe.', 'A familiar bark carries on.', 'Follow it', 'CONTINUE WHEN YOU WANT TO');
 });
 window.meowltiverse = game;
@@ -81,7 +82,7 @@ function draw() {
     if (o.type === 'bumper') { ctx.save(); ctx.translate(x, y); ctx.rotate(motion() * .12); circle(0, 0, o.r + 8, null, bio.accent + '30'); for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3; circle(Math.cos(a) * (o.r + 8), Math.sin(a) * (o.r + 8), 2, bio.accent + '99'); } ctx.shadowBlur = o.cool > 0 ? 30 : 10; ctx.shadowColor = bio.color; circle(0, 0, o.r * pulse, bio.color + '16', bio.color + 'aa', 1.5); circle(0, 0, o.r - 7, '#231b39', bio.color + '40'); star(0, 0, 10, bio.color); ctx.restore(); }
     if (o.type === 'mandala') mandala(x, y, o.r, o.phase); if (o.type === 'gate') gate(x, y, o.r, o.phase); if (o.type === 'star') star(x, y, 6 + Math.sin(motion() * 3 + o.y), '#f3d592'); if (o.type === 'portal' && !o.used) portal(x, y, o.r, o.kind); if (o.type === 'exit') portal(x, y, o.r, 'exit');
     if (o.type === 'rail') { ctx.save(); ctx.lineCap = 'round'; line(x, y, x + o.w, y - o.w * o.slant * .28, '#27374c', 15); line(x, y - 2, x + o.w, y - o.w * o.slant * .28 - 2, bio.accent + 'd0', 2); for (let i = 0; i < 3; i++) star(x + 15 + i * 22, y - (15 + i * 22) * o.slant * .28, 3, bio.accent); ctx.restore(); }
-    if (o.type === 'cat') { x += Math.sin(game.time * 1.3 + o.y) * 28; circle(x, y, 34, null, '#ef90dd22'); cat(x, y, 21, true); for (let i = 0; i < 2 - o.hits; i++) circle(x - 4 + i * 8, y + 32, 2.3, '#efb8de'); }
+    if (o.type === 'cat') { x += Math.sin(game.time * 1.3 + o.y) * 28; circle(x, y, 34, null, '#ef90dd22'); cat(x, y, 21, true); for (let i = 0; i < (o.requiredHits || 3) - o.hits; i++) circle(x + (i - 1) * 8, y + 32, 2.3, '#efb8de'); }
     if (o.type === 'bell') { circle(x, y, 17, null, '#f3d59240'); ctx.fillStyle = '#f3d592'; ctx.font = '22px serif'; ctx.textAlign = 'center'; ctx.fillText('♧', x, y + 7); }
   }
   for (let side = 0; side < 2; side++) { const f = game.flipper(side), y = sy(f.y), ey = sy(f.ey), charged = game.tapWindow[side] > 0; ctx.lineCap = 'round'; ctx.shadowColor = bio.color; ctx.shadowBlur = game.input[side] ? 24 : 8; line(f.x, y, f.ex, ey, '#3f5d68', 22); line(f.x, y - 2, f.ex, ey - 2, charged ? '#fff5cc' : game.input[side] ? '#dcffe9' : '#b9e8d9', 15); ctx.shadowBlur = 0; line(f.x, y - 5, f.ex, ey - 5, '#f0fff688', 2); circle(f.x, y, 7, '#1c2838', '#ccffea', 1); circle(f.x, y, 2, bio.color); }
@@ -90,15 +91,15 @@ function draw() {
 }
 let lastUI = '';
 function ui() {
-  const signature = [game.lives, Math.floor(game.maxHeight / 10), game.biome, game.room?.kind].join('|'); if (signature === lastUI) return; lastUI = signature;
+  const signature = [game.lives, Math.floor(game.maxHeight / 10), game.biome, game.rescuedInAdventure, game.rescueTarget, game.rescueBoost, game.room?.kind].join('|'); if (signature === lastUI) return; lastUI = signature;
   $('bells').innerHTML = Array.from({ length: 7 }, (_, i) => '<span class="bell ' + (i >= game.lives ? 'lost' : '') + '">' + bellSVG + '</span>').join(''); $('bells').setAttribute('aria-label', game.lives + ' lives remaining'); $('height').innerHTML = String(Math.floor(game.maxHeight / 10)).padStart(4, '0') + '<span> m</span>';
-  $('biomeName').textContent = game.room ? (game.room.kind === 'tide' ? 'LIQUID MOON' : 'THE HOURS BETWEEN') : BIOMES[game.biome].name; $('biomeDot').style.background = BIOMES[game.biome].color;
+  $('biomeName').textContent = game.room ? (game.room.kind === 'tide' ? 'LIQUID MOON · 3 STARDUST → PULSE' : 'THE HOURS BETWEEN · 3 STARDUST → PULSE') : BIOMES[game.biome].name + ' · RESCUE ' + game.rescuedInAdventure + '/' + game.rescueTarget + (game.rescueBoost ? ' · ✦ PULSE' : ''); $('biomeDot').style.background = BIOMES[game.biome].color;
 }
 function frame(now) { const dt = Math.min((now - last) / 1000 || 0, .05); last = now; clock += dt; accumulator += dt; while (accumulator >= 1 / 120) { game.step(1 / 120); accumulator -= 1 / 120; } draw(); ui(); requestAnimationFrame(frame); }
 requestAnimationFrame(frame);
 function clearInput() { game.input = [false, false]; document.querySelectorAll('.touch-controls button').forEach(el => el.classList.remove('active')); }
 function pause() { if (game.state === 'playing') { game.state = 'paused'; clearInput(); overlay('Paused', 'Your checkpoint is safe.', 'Resume'); } else if (game.state === 'paused') { game.state = 'playing'; $('overlay').hidden = true; } }
-$('playButton').onclick = () => { if (audio?.state === 'suspended') audio.resume(); if (game.state === 'ready') game.start(); else if (game.state === 'gameover') game.continueCheckpoint(); else if (game.state === 'summit') game.continueEndless(); else if (game.state === 'paused') game.state = 'playing'; $('overlay').hidden = true; };
+$('playButton').onclick = () => { if (audio?.state === 'suspended') audio.resume(); if (game.state === 'ready') game.start(); else if (game.state === 'gameover') game.continueCheckpoint(); else if (game.state === 'summit') game.continueEndless(); else if (game.state === 'adventure-complete') game.beginAdventure(); else if (game.state === 'paused') game.state = 'playing'; $('overlay').hidden = true; };
 const keys = new Map([['ArrowLeft', 0], ['ArrowRight', 1], ['a', 0], ['d', 1]]);
 window.addEventListener('keydown', event => { if (keys.has(event.key)) { event.preventDefault(); game.input[keys.get(event.key)] = true; } if (!event.repeat && (event.key === 'p' || event.key === 'Escape')) pause(); });
 window.addEventListener('keyup', event => { if (keys.has(event.key)) game.input[keys.get(event.key)] = false; });

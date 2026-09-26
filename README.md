@@ -11,7 +11,7 @@ A focused, phone-sized portrait pinball adventure about a cat spirit searching f
 - The lower side lanes are protected by inward guide rails; the labelled center drain is the only bell-costing route at the base.
 - Press **P** or **Escape** to pause. Enable optional sound with the music button.
 - Hit glowing portals to enter low-gravity/current or slow-time rooms. Living currents push the orb, Clockwork mandalas redirect it, and rhythm gates make their open state visible. Collect three visible stardust in a room to restore one bell, then exit through the return ring or automatically after 30 seconds.
-- Hit possessed cats twice to free them. Marked bells restore a life; lives never exceed seven.
+- Bump a possessed cat three times to free it. Rescue two cats to heal the current adventure and unlock the next one. Portal completion grants a Spirit Shield and a one-use Portal Pulse, which adds two rescue marks on your next cat strike. Marked bells restore a life; lives never exceed seven.
 - Each 150 displayed meters reaches a biome checkpoint. At zero bells, continue from that checkpoint. A voluntary local checkpoint save lets a player leave without losing their place. The false summit is at 450 meters, followed by another universe.
 
 ## Develop locally

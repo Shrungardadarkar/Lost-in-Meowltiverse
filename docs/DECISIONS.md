@@ -36,6 +36,10 @@ Safe biome checkpoints can be stored locally as a convenience for a player who c
 
 Three visible stardust in a portal restores one collar bell when needed and grants one non-stackable Spirit Shield. The shield absorbs one fall-boundary loss, then expires. A normal fall resets the camera to the bottom of the latest 25-metre safe section and returns the orb from the top, visibly falling back into play; a portal-room fall does the same from the safe point recorded at entry. These deterministic recovery aids are optional and never required for story or ordinary progression.
 
+## 2026-09-26 — Rescue is the adventure objective
+
+Each adventure asks for two visible possessed-cat rescues. A cat takes three pinball impacts, visibly shedding one rescue mark per impact before leaving as a free spirit. Completing the target pauses at a calm transition to the next adventure. Portal completion also grants one Portal Pulse: the next cat impact provides two rescue marks, making portal skill directly useful to the rescue loop.
+
 ## 2026-09-26 — The playfield is the interface
 
 The prototype presents one phone-sized playfield, not a dashboard. Routine feedback must be embedded in the ball, geometry, color, sound, and motion instead of toast notifications, persistent rule copy, activity feeds, score counters, or side-panel progression. A short overlay is reserved for an intentional start, pause, full loss, or false summit.
