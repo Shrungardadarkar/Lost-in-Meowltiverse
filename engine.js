@@ -32,7 +32,7 @@ export class Game {
 
   reset() {
     this.state = 'ready'; this.camera = 0; this.maxHeight = 0; this.lives = 7; this.score = 0; this.freed = 0;
-    this.checkpoint = 0; this.cycle = 0; this.biome = 0; this.time = 0; this.room = null; this.seen = new Set();
+    this.checkpoint = 0; this.safePoint = 0; this.cycle = 0; this.biome = 0; this.time = 0; this.room = null; this.seen = new Set(); this.shield = 0;
     this.input = [false, false]; this.previousInput = [false, false]; this.tapWindow = [0, 0]; this.flips = [0, 0];
     this.strikeLock = 0; this.guardLock = 0; this.particles = []; this.shake = 0; this.lesson = 0;
     this.savedCheckpoint = this.readSavedCheckpoint();
@@ -43,7 +43,7 @@ export class Game {
   start() {
     if (this.savedCheckpoint) {
       this.checkpoint = this.savedCheckpoint.checkpoint; this.cycle = this.savedCheckpoint.cycle || 0;
-      this.maxHeight = this.checkpoint; this.biome = Math.floor(this.checkpoint / 1500) % 3;
+      this.maxHeight = this.checkpoint; this.safePoint = this.checkpoint; this.biome = Math.floor(this.checkpoint / 1500) % 3;
       this.camera = Math.max(0, this.checkpoint - 220);
       this.emit('story', 'Your quiet checkpoint is waiting. The trail continues when you are ready.');
     } else this.emit('tutorial', 'Tap a flipper as the spirit falls. A quick tap makes the strong save.');
@@ -113,7 +113,7 @@ export class Game {
   enterRoom(portal) {
     if (this.room) return;
     portal.used = true;
-    this.room = { kind: portal.kind, returnY: this.ball.y + 120, camera: this.camera, objects: this.objects, elapsed: 0, collected: 0 };
+    this.room = { kind: portal.kind, returnY: this.ball.y + 120, camera: this.camera, objects: this.objects, elapsed: 0, collected: 0, entranceSafePoint: this.safePoint };
     this.objects = [];
     for (let i = 0; i < 5; i++) {
       const x = portal.kind === 'tide' ? (i % 2 ? 292 : 128) : (i % 2 ? 255 : 165);
@@ -124,25 +124,28 @@ export class Game {
     }
     this.objects.push({ type: 'exit', x: 210, y: 1050, r: 38 });
     this.camera = 0; this.launch(); this.seen.add(portal.kind);
-    this.emit('portal', portal.kind === 'tide' ? 'LIQUID MOON · follow the visible currents · collect 3 stardust for a bell' : 'THE HOURS BETWEEN · wait for each clock gate to bloom · collect 3 stardust for a bell');
+    this.emit('portal', portal.kind === 'tide' ? 'LIQUID MOON · follow visible currents · 3 stardust earns a bell + Spirit Shield' : 'THE HOURS BETWEEN · wait for each gate · 3 stardust earns a bell + Spirit Shield');
   }
 
   exitRoom() {
     const room = this.room; if (!room) return;
     this.objects = room.objects; this.camera = Math.max(room.camera, room.returnY - 420); this.room = null;
     this.ball = { x: 210, y: room.returnY, vx: 0, vy: 600, r: 13, trail: [] };
-    if (room.collected >= 3) this.gainLife('You completed the pocket world');
+    if (room.collected >= 3) { this.gainLife('You completed the pocket world'); this.shield = 1; this.emit('shield', 'Spirit Shield gained · it protects your next fall.'); }
     this.addScore(250); this.emit('story', 'Another world discovered. The trail continues.');
   }
 
   loseLife() {
-    if (this.room) { this.objects = this.room.objects; this.camera = this.room.camera; this.room = null; }
+    const fromRoom = !!this.room;
+    if (this.room) { this.objects = this.room.objects; this.camera = this.room.camera; this.safePoint = this.room.entranceSafePoint; this.room = null; }
+    this.camera = Math.max(0, this.safePoint - 220);
+    if (this.shield) { this.shield = 0; this.launch(); this.emit('shield', 'Spirit Shield held the fall · returning to your last safe point.'); return; }
     this.lives--; this.shake = 12;
     if (this.lives <= 0) { this.lives = 0; this.state = 'gameover'; this.emit('gameover', 'Even little spirits need a second chance.'); return; }
-    this.launch(); this.emit('lost', 'One bell fades. The side rails will guide your next save inward.');
+    this.launch(); this.emit('lost', (fromRoom ? 'Portal room ended · ' : 'Fall boundary crossed · ') + 'one bell fades. Returning to last safe point.');
   }
 
-  continueCheckpoint() { this.lives = 7; this.camera = Math.max(0, this.checkpoint - 220); this.maxHeight = this.checkpoint; this.biome = Math.floor(this.checkpoint / 1500) % 3; this.state = 'playing'; this.launch(); }
+  continueCheckpoint() { this.lives = 7; this.safePoint = this.checkpoint; this.camera = Math.max(0, this.checkpoint - 220); this.maxHeight = this.checkpoint; this.biome = Math.floor(this.checkpoint / 1500) % 3; this.state = 'playing'; this.launch(); this.emit('checkpoint', 'Returning to ' + BIOMES[this.biome].name + ' checkpoint.'); }
   continueEndless() { this.cycle++; this.state = 'playing'; this.generate(this.maxHeight + 6000); this.launch(); this.emit('story', 'Universe ' + (this.cycle + 1) + ' · That bark is still a little further.'); }
 
   flipper(side) {
@@ -242,11 +245,11 @@ export class Game {
     }
     this.camera += (Math.max(this.camera, b.y - 470) - this.camera) * Math.min(1, dt * 6);
     if (!this.room) {
-      this.maxHeight = Math.max(this.maxHeight, b.y - 146);
+      this.maxHeight = Math.max(this.maxHeight, b.y - 146); this.safePoint = Math.max(this.safePoint, Math.floor(this.maxHeight / 250) * 250);
       const zone = Math.floor(this.maxHeight / 1500);
       if (zone > Math.floor(this.checkpoint / 1500)) {
-        this.checkpoint = zone * 1500; this.biome = zone % 3; this.persistCheckpoint();
-        this.emit('checkpoint', BIOMES[this.biome].story + ' · Checkpoint safe. Pause or leave whenever you like.');
+        this.checkpoint = zone * 1500; this.safePoint = Math.max(this.safePoint, this.checkpoint); this.biome = zone % 3; this.persistCheckpoint();
+        this.emit('checkpoint', BIOMES[this.biome].name + ' checkpoint reached · ' + BIOMES[this.biome].story);
       }
       if (this.maxHeight >= (this.cycle + 1) * 4500) { this.persistCheckpoint(); this.state = 'summit'; this.emit('summit'); }
       this.generate(this.camera + 1800);

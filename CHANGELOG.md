@@ -11,6 +11,7 @@ All notable player-facing and contributor-facing changes are recorded here. This
 - Replaced the repeated fixed climb pattern with authored biome module decks: catch gardens, banks, pawprint gates, living tide channels, mandala blooms, and rhythm gates.
 - Added interactive fluid currents, rotating mandalas, and readable time gates, plus distinct living visual language for every biome.
 - Added voluntary local checkpoint continuity and updated player-facing guidance to emphasize pause-and-return rather than pressure.
+- Clarified last-safe-point and portal-entry recovery, and added the optional one-use Spirit Shield to portal completion rewards.
 - Replaced score-threshold life rewards with explicit, deterministic recovery rewards.
 - Added project context, behavioral-design rules, room and playtest templates, agent orchestration, contributor PR guidance, and repository-local agent skills.
 

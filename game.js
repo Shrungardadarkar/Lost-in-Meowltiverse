@@ -10,7 +10,7 @@ const motion = () => reduced ? 0 : clock;
 function tone(kind) {
   if (!sound || !audio) return;
   const osc = audio.createOscillator(), gain = audio.createGain();
-  const pitches = { flip: 190, catch: 115, rail: 280, hit: 340, collect: 740, portal: 110, spirit: 880, bell: 1046, lost: 100, mandala: 510, 'gate-wait': 180 };
+  const pitches = { flip: 190, catch: 115, rail: 280, hit: 340, collect: 740, portal: 110, spirit: 880, bell: 1046, lost: 100, shield: 920, checkpoint: 660, mandala: 510, 'gate-wait': 180 };
   const pitch = pitches[kind] || 430;
   osc.frequency.setValueAtTime(pitch, audio.currentTime); osc.frequency.exponentialRampToValueAtTime(pitch * (kind === 'lost' ? .65 : 1.35), audio.currentTime + .16);
   osc.type = kind === 'flip' ? 'triangle' : 'sine'; gain.gain.setValueAtTime(.045, audio.currentTime); gain.gain.exponentialRampToValueAtTime(.001, audio.currentTime + .27);
@@ -91,9 +91,9 @@ function draw() {
 }
 let lastUI = '';
 function ui() {
-  const signature = [game.lives, Math.floor(game.maxHeight / 10), game.score, game.freed, game.biome, game.room?.kind, game.cycle, game.state, game.lesson].join('|'); if (signature === lastUI) return; lastUI = signature;
+  const signature = [game.lives, Math.floor(game.maxHeight / 10), game.score, game.freed, game.biome, game.room?.kind, game.cycle, game.state, game.lesson, game.shield].join('|'); if (signature === lastUI) return; lastUI = signature;
   $('bells').innerHTML = Array.from({ length: 7 }, (_, i) => '<span class="bell ' + (i >= game.lives ? 'lost' : '') + '">' + bellSVG + '</span>').join(''); $('bells').setAttribute('aria-label', game.lives + ' lives remaining'); $('height').innerHTML = String(Math.floor(game.maxHeight / 10)).padStart(4, '0') + '<span> m</span>'; $('score').textContent = game.score.toLocaleString(); $('spirits').textContent = game.freed;
-  $('biomeName').textContent = game.room ? (game.room.kind === 'tide' ? 'LIQUID MOON' : 'THE HOURS BETWEEN') : BIOMES[game.biome].name; $('biomeDot').style.background = BIOMES[game.biome].color; $('dimensionLabel').textContent = 'REALITY ' + String(game.cycle + 1).padStart(3, '0'); $('roomRule').hidden = !game.room; $('roomRule').textContent = game.room?.kind === 'tide' ? '↔ FOLLOW THE CURRENT · 3 STARDUST RESTORES A BELL' : '◷ WAIT FOR THE GATE TO BLOOM · 3 STARDUST RESTORES A BELL';
+  $('biomeName').textContent = game.room ? (game.room.kind === 'tide' ? 'LIQUID MOON' : 'THE HOURS BETWEEN') : BIOMES[game.biome].name; $('biomeDot').style.background = BIOMES[game.biome].color; $('dimensionLabel').textContent = 'REALITY ' + String(game.cycle + 1).padStart(3, '0'); $('roomRule').hidden = !game.room; $('roomRule').textContent = game.room?.kind === 'tide' ? '↔ FOLLOW THE CURRENT · 3 STARDUST → BELL + SHIELD' : '◷ WAIT FOR THE GATE · 3 STARDUST → BELL + SHIELD'; $('booster').hidden = !game.shield;
   document.querySelectorAll('[data-zone]').forEach(el => { el.classList.toggle('active', +el.dataset.zone === (game.state === 'summit' ? 3 : game.biome)); el.classList.toggle('visited', +el.dataset.zone < game.biome); }); if (game.seen.size) $('discoveryText').textContent = game.seen.size + ' pocket ' + (game.seen.size === 1 ? 'world discovered.' : 'worlds discovered.') + ' There is always another way through.';
 }
 function frame(now) { const dt = Math.min((now - last) / 1000 || 0, .05); last = now; clock += dt; accumulator += dt; while (accumulator >= 1 / 120) { game.step(1 / 120); accumulator -= 1 / 120; } draw(); ui(); requestAnimationFrame(frame); }

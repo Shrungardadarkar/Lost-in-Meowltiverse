@@ -30,6 +30,10 @@ Tide flows apply a directional force, Clockwork mandalas alter an exit vector, a
 
 Safe biome checkpoints can be stored locally as a convenience for a player who chooses to leave. There is no streak, return timer, or penalty for stopping.
 
+## 2026-09-26 — Portal rewards protect without gating progress
+
+Three visible stardust in a portal restores one collar bell when needed and grants one non-stackable Spirit Shield. The shield absorbs one fall-boundary loss, then expires. A normal fall returns to the latest 25-metre safe point; a portal-room fall returns to the safe point recorded at entry. These deterministic recovery aids are optional and never required for story or ordinary progression.
+
 ## 2026-09-26 — Repository context is part of the product
 
 `AGENTS.md`, `docs/`, room cards, the changelog, and the PR template are maintained with the code. GitHub is the intended public source of truth once repository write access is available.
