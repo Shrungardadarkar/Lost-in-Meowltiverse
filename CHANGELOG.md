@@ -6,6 +6,8 @@ All notable player-facing and contributor-facing changes are recorded here. This
 
 ### Changed
 
+- Simplified the presentation to one centered phone-sized playfield and removed the surrounding editorial panels, score display, journey map, toolbar, and touch labels.
+- Removed routine in-game toast messages, room-rule banners, and canvas text labels; moment-to-moment feedback now lives in the ball, geometry, color, sound, and motion. Pause, a full loss, and the false summit retain a minimal intentional screen.
 - Reworked the ascent around deliberate release-and-tap flipper timing; held inputs no longer create repeated launch energy.
 - Added protected lower side rails so only the center drain costs a collar bell.
 - Replaced the repeated fixed climb pattern with authored biome module decks: catch gardens, banks, pawprint gates, living tide channels, mandala blooms, and rhythm gates.

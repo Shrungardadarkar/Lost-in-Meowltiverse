@@ -34,6 +34,10 @@ Safe biome checkpoints can be stored locally as a convenience for a player who c
 
 Three visible stardust in a portal restores one collar bell when needed and grants one non-stackable Spirit Shield. The shield absorbs one fall-boundary loss, then expires. A normal fall returns to the latest 25-metre safe point; a portal-room fall returns to the safe point recorded at entry. These deterministic recovery aids are optional and never required for story or ordinary progression.
 
+## 2026-09-26 — The playfield is the interface
+
+The prototype presents one phone-sized playfield, not a dashboard. Routine feedback must be embedded in the ball, geometry, color, sound, and motion instead of toast notifications, persistent rule copy, activity feeds, score counters, or side-panel progression. A short overlay is reserved for an intentional start, pause, full loss, or false summit.
+
 ## 2026-09-26 — Repository context is part of the product
 
 `AGENTS.md`, `docs/`, room cards, the changelog, and the PR template are maintained with the code. GitHub is the intended public source of truth once repository write access is available.

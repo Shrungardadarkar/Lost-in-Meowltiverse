@@ -3,7 +3,7 @@ import { Game, BIOMES, W, H } from './engine.js';
 const $ = id => document.getElementById(id);
 const canvas = $('game'), ctx = canvas.getContext('2d');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-let clock = 0, last = 0, accumulator = 0, toastTimer, audio, sound = false;
+let clock = 0, last = 0, accumulator = 0, audio, sound = false;
 const bellSVG = '<svg viewBox="0 0 20 24" fill="none" aria-hidden="true"><path d="M7 4a3 3 0 0 1 6 0M4 10a6 6 0 0 1 12 0v5l2 3H2l2-3z" stroke="currentColor" stroke-width="1.5"/><path d="M8 21h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
 const motion = () => reduced ? 0 : clock;
 
@@ -16,18 +16,17 @@ function tone(kind) {
   osc.type = kind === 'flip' ? 'triangle' : 'sine'; gain.gain.setValueAtTime(.045, audio.currentTime); gain.gain.exponentialRampToValueAtTime(.001, audio.currentTime + .27);
   osc.connect(gain); gain.connect(audio.destination); osc.start(); osc.stop(audio.currentTime + .28);
 }
-function notify(text) { $('toast').textContent = text; $('toast').classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => $('toast').classList.remove('show'), 3900); }
-function overlay(eyebrow, title, text, button, hint = 'TAP IN RHYTHM · HIT PORTALS TO EXPLORE') {
-  $('overlayEyebrow').textContent = eyebrow; $('overlayTitle').innerHTML = title; $('overlayText').textContent = text;
+function overlay(title, text, button, hint = 'TAP A FLIPPER AT CONTACT') {
+  $('overlayTitle').innerHTML = title; $('overlayText').textContent = text;
   $('playButton').innerHTML = button + ' <span>↗</span>'; $('overlayHint').textContent = hint; $('overlay').hidden = false;
 }
 const game = new Game(event => {
-  tone(event.type); if (event.text && event.type !== 'gameover') notify(event.text);
-  if (event.type === 'gameover') overlay('YOUR BELLS HAVE FALLEN SILENT', 'A little rest.<br>Then a little further.', 'Your biome checkpoint is safe. Your friend is still waiting.', 'Return to checkpoint');
-  if (event.type === 'summit') overlay('THE END OF THIS WORLD', 'That wasn’t<br>the last universe.', 'A familiar bark comes from the other side. Somewhere, your dog is still calling.', 'Follow the bark', 'YOUR PROGRESS IS SAFE · CONTINUE ONLY WHEN YOU WANT TO');
+  tone(event.type);
+  if (event.type === 'gameover') overlay('Rest, then<br>return.', 'Your checkpoint is safe.', 'Continue');
+  if (event.type === 'summit') overlay('Another<br>universe.', 'A familiar bark carries on.', 'Follow it', 'CONTINUE WHEN YOU WANT TO');
 });
 window.meowltiverse = game;
-if (game.savedCheckpoint) overlay('YOUR QUIET CHECKPOINT IS SAFE', 'The trail still<br>remembers you.', 'There is no rush. Return when you feel like another small climb.', 'Continue the ascent', 'NO STREAKS · NO PRESSURE · JUST THE NEXT SHOT');
+if (game.savedCheckpoint) overlay('Lost in<br>Meowltiverse', 'Your quiet checkpoint is ready.', 'Continue');
 function resize() { const dpr = Math.min(devicePixelRatio || 1, 2); canvas.width = W * dpr; canvas.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); }
 resize(); window.addEventListener('resize', resize);
 
@@ -46,7 +45,7 @@ function portal(x, y, r, kind) {
   const color = kind === 'tide' ? '#83eee4' : kind === 'exit' ? '#f4d28f' : '#e5a3ff', t = motion();
   ctx.save(); ctx.translate(x, y); ctx.shadowBlur = 20; ctx.shadowColor = color; ctx.scale(.82, 1.1); circle(0, 0, r, '#130d2d', color, 2); ctx.shadowBlur = 0;
   for (let i = 0; i < 4; i++) { ctx.save(); ctx.rotate(t * .35 + i * .5); ctx.beginPath(); ctx.ellipse(0, 0, r * (.28 + i * .16), r * .8, 0, 0, 7); ctx.strokeStyle = color + (i === 3 ? '70' : '35'); ctx.lineWidth = 1; ctx.stroke(); ctx.restore(); }
-  star(0, 0, 10, color); ctx.restore(); ctx.fillStyle = color; ctx.font = '8px "DM Sans", sans-serif'; ctx.textAlign = 'center'; ctx.fillText(kind === 'tide' ? 'FLOW WORLD' : kind === 'exit' ? 'RETURN HOME' : 'TIME WORLD', x, y + r + 24);
+  star(0, 0, 10, color); ctx.restore();
 }
 function mandala(x, y, r, phase = 0) {
   const bio = BIOMES[game.biome], t = motion(); ctx.save(); ctx.translate(x, y); ctx.shadowBlur = 18; ctx.shadowColor = bio.accent;
@@ -61,7 +60,7 @@ function gate(x, y, r, phase = 0) {
 }
 function flow(x, y, w, h, dir) {
   const bio = BIOMES[game.biome], t = motion(); ctx.save(); ctx.beginPath(); ctx.roundRect(x, y - h, w, h, 18); ctx.fillStyle = bio.color + '10'; ctx.fill(); ctx.clip();
-  for (let row = 0; row < 4; row++) { const yy = y - h + 18 + row * (h - 30) / 3; ctx.beginPath(); for (let px = x - 15; px < x + w + 20; px += 12) ctx.lineTo(px, yy + (reduced ? 0 : Math.sin(px / 34 + t * 2.2 + row) * 8)); ctx.strokeStyle = bio.color + '53'; ctx.lineWidth = row === 1 ? 2 : 1; ctx.stroke(); } ctx.restore(); ctx.fillStyle = bio.color + 'b5'; ctx.font = '7px "DM Sans", sans-serif'; ctx.textAlign = 'center'; ctx.fillText(dir > 0 ? '→ CURRENT' : 'CURRENT ←', x + w / 2, y - h - 5);
+  for (let row = 0; row < 4; row++) { const yy = y - h + 18 + row * (h - 30) / 3; ctx.beginPath(); for (let px = x - 15; px < x + w + 20; px += 12) ctx.lineTo(px, yy + (reduced ? 0 : Math.sin(px / 34 + t * 2.2 + row) * 8)); ctx.strokeStyle = bio.color + '53'; ctx.lineWidth = row === 1 ? 2 : 1; ctx.stroke(); } ctx.restore();
 }
 function drawGuards(sy) { const bio = BIOMES[game.biome]; for (const guard of game.guards()) { line(guard.a.x, sy(guard.a.y), guard.b.x, sy(guard.b.y), '#172536', 17); line(guard.a.x, sy(guard.a.y), guard.b.x, sy(guard.b.y), bio.color + 'cc', 5); line(guard.a.x, sy(guard.a.y) - 2, guard.b.x, sy(guard.b.y) - 2, '#f4fff1aa', 1); } }
 function background() {
@@ -85,24 +84,20 @@ function draw() {
     if (o.type === 'bell') { circle(x, y, 17, null, '#f3d59240'); ctx.fillStyle = '#f3d592'; ctx.font = '22px serif'; ctx.textAlign = 'center'; ctx.fillText('♧', x, y + 7); }
   }
   for (let side = 0; side < 2; side++) { const f = game.flipper(side), y = sy(f.y), ey = sy(f.ey), charged = game.tapWindow[side] > 0; ctx.lineCap = 'round'; ctx.shadowColor = bio.color; ctx.shadowBlur = game.input[side] ? 24 : 8; line(f.x, y, f.ex, ey, '#3f5d68', 22); line(f.x, y - 2, f.ex, ey - 2, charged ? '#fff5cc' : game.input[side] ? '#dcffe9' : '#b9e8d9', 15); ctx.shadowBlur = 0; line(f.x, y - 5, f.ex, ey - 5, '#f0fff688', 2); circle(f.x, y, 7, '#1c2838', '#ccffea', 1); circle(f.x, y, 2, bio.color); }
-  ctx.textAlign = 'center'; ctx.fillStyle = '#d8d0ea86'; ctx.font = '8px "DM Sans", sans-serif'; ctx.fillText('SIDE RAILS GUIDE INWARD · ONLY THE CENTER DRAIN COSTS A BELL', 210, H - 48);
   const b = game.ball; for (let i = b.trail.length - 1; i >= 0; i--) { const p = b.trail[i]; circle(p.x, sy(p.y), b.r * (1 - i / 24) * .8, bio.color + Math.floor((1 - i / 23) * 35).toString(16).padStart(2, '0')); } cat(b.x, sy(b.y), b.r);
   for (const p of game.particles) { ctx.globalAlpha = Math.max(0, p.life); star(p.x, sy(p.y), 3 * p.life, p.color); } ctx.globalAlpha = 1; if (game.state === 'ready') { mandala(210, 222, 42, 0); portal(92, 278, 30, 'tide'); cat(295, 206, 19); } ctx.restore();
 }
 let lastUI = '';
 function ui() {
-  const signature = [game.lives, Math.floor(game.maxHeight / 10), game.score, game.freed, game.biome, game.room?.kind, game.cycle, game.state, game.lesson, game.shield].join('|'); if (signature === lastUI) return; lastUI = signature;
-  $('bells').innerHTML = Array.from({ length: 7 }, (_, i) => '<span class="bell ' + (i >= game.lives ? 'lost' : '') + '">' + bellSVG + '</span>').join(''); $('bells').setAttribute('aria-label', game.lives + ' lives remaining'); $('height').innerHTML = String(Math.floor(game.maxHeight / 10)).padStart(4, '0') + '<span> m</span>'; $('score').textContent = game.score.toLocaleString(); $('spirits').textContent = game.freed;
-  $('biomeName').textContent = game.room ? (game.room.kind === 'tide' ? 'LIQUID MOON' : 'THE HOURS BETWEEN') : BIOMES[game.biome].name; $('biomeDot').style.background = BIOMES[game.biome].color; $('dimensionLabel').textContent = 'REALITY ' + String(game.cycle + 1).padStart(3, '0'); $('roomRule').hidden = !game.room; $('roomRule').textContent = game.room?.kind === 'tide' ? '↔ FOLLOW THE CURRENT · 3 STARDUST → BELL + SHIELD' : '◷ WAIT FOR THE GATE · 3 STARDUST → BELL + SHIELD'; $('booster').hidden = !game.shield;
-  document.querySelectorAll('[data-zone]').forEach(el => { el.classList.toggle('active', +el.dataset.zone === (game.state === 'summit' ? 3 : game.biome)); el.classList.toggle('visited', +el.dataset.zone < game.biome); }); if (game.seen.size) $('discoveryText').textContent = game.seen.size + ' pocket ' + (game.seen.size === 1 ? 'world discovered.' : 'worlds discovered.') + ' There is always another way through.';
+  const signature = [game.lives, Math.floor(game.maxHeight / 10), game.biome, game.room?.kind].join('|'); if (signature === lastUI) return; lastUI = signature;
+  $('bells').innerHTML = Array.from({ length: 7 }, (_, i) => '<span class="bell ' + (i >= game.lives ? 'lost' : '') + '">' + bellSVG + '</span>').join(''); $('bells').setAttribute('aria-label', game.lives + ' lives remaining'); $('height').innerHTML = String(Math.floor(game.maxHeight / 10)).padStart(4, '0') + '<span> m</span>';
+  $('biomeName').textContent = game.room ? (game.room.kind === 'tide' ? 'LIQUID MOON' : 'THE HOURS BETWEEN') : BIOMES[game.biome].name; $('biomeDot').style.background = BIOMES[game.biome].color;
 }
 function frame(now) { const dt = Math.min((now - last) / 1000 || 0, .05); last = now; clock += dt; accumulator += dt; while (accumulator >= 1 / 120) { game.step(1 / 120); accumulator -= 1 / 120; } draw(); ui(); requestAnimationFrame(frame); }
 requestAnimationFrame(frame);
 function clearInput() { game.input = [false, false]; document.querySelectorAll('.touch-controls button').forEach(el => el.classList.remove('active')); }
-function pause() { if (game.state === 'playing') { game.state = 'paused'; clearInput(); overlay('TAKE A BREATH', 'The universe<br>can wait.', 'Your path is saved at each biome. There is no penalty for leaving.', 'Keep climbing', 'PAUSE IS PART OF THE JOURNEY'); } else if (game.state === 'paused') { game.state = 'playing'; $('overlay').hidden = true; } }
+function pause() { if (game.state === 'playing') { game.state = 'paused'; clearInput(); overlay('Paused', 'Your checkpoint is safe.', 'Resume'); } else if (game.state === 'paused') { game.state = 'playing'; $('overlay').hidden = true; } }
 $('playButton').onclick = () => { if (audio?.state === 'suspended') audio.resume(); if (game.state === 'ready') game.start(); else if (game.state === 'gameover') game.continueCheckpoint(); else if (game.state === 'summit') game.continueEndless(); else if (game.state === 'paused') game.state = 'playing'; $('overlay').hidden = true; };
-$('pauseButton').onclick = pause;
-$('soundButton').onclick = () => { sound = !sound; if (sound) { audio ??= new (window.AudioContext || window.webkitAudioContext)(); audio.resume(); tone('collect'); } $('soundButton').innerHTML = '♫ <span>SOUND ' + (sound ? 'ON' : 'OFF') + '</span>'; $('soundButton').setAttribute('aria-label', sound ? 'Mute sound' : 'Enable sound'); };
 const keys = new Map([['ArrowLeft', 0], ['ArrowRight', 1], ['a', 0], ['d', 1]]);
 window.addEventListener('keydown', event => { if (keys.has(event.key)) { event.preventDefault(); game.input[keys.get(event.key)] = true; } if (!event.repeat && (event.key === 'p' || event.key === 'Escape')) pause(); });
 window.addEventListener('keyup', event => { if (keys.has(event.key)) game.input[keys.get(event.key)] = false; });
