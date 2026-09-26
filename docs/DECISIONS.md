@@ -18,6 +18,8 @@ Main-climb physics remain stable. Portal worlds alter one primary rule and commu
 
 A flipper receives its strong launch only on a fresh press close to contact. Holding an input is visually allowed for accessibility and catch posture, but cannot repeatedly generate climb energy. This makes the principal skill legible and avoids an autopilot strategy.
 
+Idle flippers remain solid: they catch a descending orb and send it into a soft inward bounce. That bounce deliberately has too little energy to sustain the climb, so waiting leads naturally toward the visible centre drain. A fresh press at contact remains the strong, directional rescue shot.
+
 ## 2026-09-26 — Side lanes guide; the center drain decides
 
 The lower side spaces are protected by diagonal guide rails that redirect a descending orb inward. This preserves traditional pinball's readable lower-playfield geometry without making a near-miss feel arbitrarily expensive. The center drain remains the clearly signaled failure route.
@@ -32,7 +34,7 @@ Safe biome checkpoints can be stored locally as a convenience for a player who c
 
 ## 2026-09-26 — Portal rewards protect without gating progress
 
-Three visible stardust in a portal restores one collar bell when needed and grants one non-stackable Spirit Shield. The shield absorbs one fall-boundary loss, then expires. A normal fall returns to the latest 25-metre safe point; a portal-room fall returns to the safe point recorded at entry. These deterministic recovery aids are optional and never required for story or ordinary progression.
+Three visible stardust in a portal restores one collar bell when needed and grants one non-stackable Spirit Shield. The shield absorbs one fall-boundary loss, then expires. A normal fall resets the camera to the bottom of the latest 25-metre safe section and returns the orb from the top, visibly falling back into play; a portal-room fall does the same from the safe point recorded at entry. These deterministic recovery aids are optional and never required for story or ordinary progression.
 
 ## 2026-09-26 — Repository context is part of the product
 

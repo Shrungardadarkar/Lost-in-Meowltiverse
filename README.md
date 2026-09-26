@@ -6,9 +6,9 @@ A portrait pinball adventure about a cat spirit searching for its lost dog frien
 
 ## Play
 
-- Use **left/right arrows** or **A/D** to operate the flippers. Release, then tap as the orb meets a flipper: a timed tap creates the strong shot. Holding a key is deliberately not a substitute for timing.
+- Use **left/right arrows** or **A/D** to operate the flippers. An idle flipper catches the orb with a soft inward bounce that loses height. Release, then tap as the orb meets a flipper for the strong directional shot; holding a key is deliberately not a substitute for timing.
 - On mobile, tap either half of the playfield. Both sides support simultaneous touches.
-- The lower side lanes are protected by inward guide rails; the center drain is the only bell-costing route at the base.
+- The lower side lanes are protected by inward guide rails; the labelled center drain is the only bell-costing route at the base.
 - Press **P** or **Escape** to pause. Enable optional sound with the music button.
 - Hit glowing portals to enter low-gravity/current or slow-time rooms. Living currents push the orb, Clockwork mandalas redirect it, and rhythm gates make their open state visible. Collect three visible stardust in a room to restore one bell, then exit through the return ring or automatically after 30 seconds.
 - Hit possessed cats twice to free them. Marked bells restore a life; lives never exceed seven.

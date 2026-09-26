@@ -64,6 +64,7 @@ function flow(x, y, w, h, dir) {
   for (let row = 0; row < 4; row++) { const yy = y - h + 18 + row * (h - 30) / 3; ctx.beginPath(); for (let px = x - 15; px < x + w + 20; px += 12) ctx.lineTo(px, yy + (reduced ? 0 : Math.sin(px / 34 + t * 2.2 + row) * 8)); ctx.strokeStyle = bio.color + '53'; ctx.lineWidth = row === 1 ? 2 : 1; ctx.stroke(); } ctx.restore(); ctx.fillStyle = bio.color + 'b5'; ctx.font = '7px "DM Sans", sans-serif'; ctx.textAlign = 'center'; ctx.fillText(dir > 0 ? '→ CURRENT' : 'CURRENT ←', x + w / 2, y - h - 5);
 }
 function drawGuards(sy) { const bio = BIOMES[game.biome]; for (const guard of game.guards()) { line(guard.a.x, sy(guard.a.y), guard.b.x, sy(guard.b.y), '#172536', 17); line(guard.a.x, sy(guard.a.y), guard.b.x, sy(guard.b.y), bio.color + 'cc', 5); line(guard.a.x, sy(guard.a.y) - 2, guard.b.x, sy(guard.b.y) - 2, '#f4fff1aa', 1); } }
+function drawDrain(sy) { const y = sy(game.camera + 42); ctx.save(); ctx.beginPath(); ctx.moveTo(158, y); ctx.lineTo(262, y); ctx.lineTo(242, y + 37); ctx.lineTo(178, y + 37); ctx.closePath(); ctx.fillStyle = '#060817aa'; ctx.fill(); ctx.strokeStyle = '#f3d59272'; ctx.lineWidth = 1.5; ctx.stroke(); ctx.fillStyle = '#f3d592b8'; ctx.textAlign = 'center'; ctx.font = '8px "DM Sans", sans-serif'; ctx.fillText('CENTER DRAIN ↓', 210, y + 17); ctx.restore(); }
 function background() {
   const bio = BIOMES[game.biome], room = game.room, t = motion(), bg = ctx.createLinearGradient(0, 0, W, H);
   bg.addColorStop(0, room?.kind === 'tide' ? '#124b56' : bio.bg); bg.addColorStop(.58, room?.kind === 'time' ? '#4a294c' : bio.mid); bg.addColorStop(1, bio.low); ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
@@ -74,7 +75,7 @@ function background() {
 }
 function draw() {
   ctx.clearRect(0, 0, W, H); ctx.save(); if (!reduced && game.shake > 1) ctx.translate(Math.sin(clock * 120) * game.shake * .4, Math.cos(clock * 95) * game.shake * .3); background();
-  const bio = BIOMES[game.biome], sy = y => H - (y - game.camera); drawGuards(sy);
+  const bio = BIOMES[game.biome], sy = y => H - (y - game.camera); drawGuards(sy); drawDrain(sy);
   for (const o of game.objects) {
     const y = sy(o.y); if (o.dead || y < -110 || y > H + 110) continue; let x = o.x, pulse = 1 + Math.sin(motion() * 2 + o.y) * .04;
     if (o.type === 'flow') { flow(o.x, sy(o.y + o.h), o.w, o.h, o.dir); continue; }
@@ -85,7 +86,7 @@ function draw() {
     if (o.type === 'bell') { circle(x, y, 17, null, '#f3d59240'); ctx.fillStyle = '#f3d592'; ctx.font = '22px serif'; ctx.textAlign = 'center'; ctx.fillText('♧', x, y + 7); }
   }
   for (let side = 0; side < 2; side++) { const f = game.flipper(side), y = sy(f.y), ey = sy(f.ey), charged = game.tapWindow[side] > 0; ctx.lineCap = 'round'; ctx.shadowColor = bio.color; ctx.shadowBlur = game.input[side] ? 24 : 8; line(f.x, y, f.ex, ey, '#3f5d68', 22); line(f.x, y - 2, f.ex, ey - 2, charged ? '#fff5cc' : game.input[side] ? '#dcffe9' : '#b9e8d9', 15); ctx.shadowBlur = 0; line(f.x, y - 5, f.ex, ey - 5, '#f0fff688', 2); circle(f.x, y, 7, '#1c2838', '#ccffea', 1); circle(f.x, y, 2, bio.color); }
-  ctx.textAlign = 'center'; ctx.fillStyle = '#d8d0ea86'; ctx.font = '8px "DM Sans", sans-serif'; ctx.fillText('SIDE RAILS GUIDE INWARD · ONLY THE CENTER DRAIN COSTS A BELL', 210, H - 48);
+  ctx.textAlign = 'center'; ctx.fillStyle = '#d8d0ea86'; ctx.font = '8px "DM Sans", sans-serif'; ctx.fillText('IDLE FLIPPERS CATCH SOFTLY · TAP AT CONTACT TO CLIMB', 210, H - 48);
   const b = game.ball; for (let i = b.trail.length - 1; i >= 0; i--) { const p = b.trail[i]; circle(p.x, sy(p.y), b.r * (1 - i / 24) * .8, bio.color + Math.floor((1 - i / 23) * 35).toString(16).padStart(2, '0')); } cat(b.x, sy(b.y), b.r);
   for (const p of game.particles) { ctx.globalAlpha = Math.max(0, p.life); star(p.x, sy(p.y), 3 * p.life, p.color); } ctx.globalAlpha = 1; if (game.state === 'ready') { mandala(210, 222, 42, 0); portal(92, 278, 30, 'tide'); cat(295, 206, 19); } ctx.restore();
 }

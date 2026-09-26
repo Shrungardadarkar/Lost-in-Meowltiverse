@@ -13,7 +13,7 @@
 | Stage | Layout and behavior | Player feedback | Failure and recovery |
 | --- | --- | --- | --- |
 | Preview | A low bumper and two slanted chrome rails show the available return angles. | Rail lines, warm impact pulse, and lower guide-rail signage. | Near-misses enter side guide rails rather than an immediate drain. |
-| Practice | One bumper creates a repeatable medium arc back to a flipper. | A small directional burst follows the bounce. | The center drain still removes one bell and respawns at the safe elevation. |
+| Practice | One bumper creates a repeatable medium arc back to a flipper. Idle flippers catch it with a soft inward bounce; a fresh tap turns that contact into a strong route shot. | A small directional burst follows the bounce, while the centre gap is visibly labelled. | Repeated idle catches lose height until the center drain removes one bell and respawns at the safe elevation. |
 | Choice | A left and right bank each lead to a visible pawprint or spirit route. | Both routes stay visible; neither is score-gated. | The unchosen route remains a later discovery, not a lost reward. |
 | Release | A broad rail feeds the next authored module. | Sound resolves and motion quiets briefly. | No countdown, streak, or forced continuation. |
 
@@ -27,5 +27,5 @@
 ## Implementation and validation
 
 - Module / object changes: `catch-garden`, `silver-bank`, and `pawprint-gate` in `engine.js`.
-- Tests: timing-aware ascent reaches the summit; held inputs cannot replace timing; lower rails return a descending orb inward.
+- Tests: idle-flipper collision, fresh-tap collision, named centre-drain fall, one-bell drain loss, timing-aware ascent, and lower-rail return.
 - Documentation to update: this card, `CHANGELOG.md`, and the playtest protocol when layout changes.

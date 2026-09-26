@@ -32,7 +32,7 @@ export class Game {
 
   reset() {
     this.state = 'ready'; this.camera = 0; this.maxHeight = 0; this.lives = 7; this.score = 0; this.freed = 0;
-    this.checkpoint = 0; this.safePoint = 0; this.cycle = 0; this.biome = 0; this.time = 0; this.room = null; this.seen = new Set(); this.shield = 0;
+    this.checkpoint = 0; this.safePoint = 0; this.cycle = 0; this.biome = 0; this.time = 0; this.room = null; this.seen = new Set(); this.shield = 0; this.recovering = false;
     this.input = [false, false]; this.previousInput = [false, false]; this.tapWindow = [0, 0]; this.flips = [0, 0];
     this.strikeLock = 0; this.guardLock = 0; this.particles = []; this.shake = 0; this.lesson = 0;
     this.savedCheckpoint = this.readSavedCheckpoint();
@@ -50,7 +50,8 @@ export class Game {
     this.state = 'playing'; this.launch();
   }
 
-  launch() { this.ball = { x: 210, y: this.camera + 146, vx: this.time % 2 > 1 ? -65 : 65, vy: 670, r: 13, trail: [] }; this.strikeLock = .3; }
+  launch() { this.ball = { x: 210, y: this.camera + 146, vx: this.time % 2 > 1 ? -65 : 65, vy: 670, r: 13, trail: [] }; this.strikeLock = .3; this.recovering = false; }
+  resumeFromRecovery() { this.ball = { x: 210, y: this.camera + H - 72, vx: this.time % 2 > 1 ? -65 : 65, vy: -110, r: 13, trail: [] }; this.strikeLock = .3; this.recovering = true; }
 
   buildModule(kind, y, r) {
     const star = (x, offset = 70) => this.objects.push({ type: 'star', x, y: y + offset, r: 9 });
@@ -138,11 +139,11 @@ export class Game {
   loseLife() {
     const fromRoom = !!this.room;
     if (this.room) { this.objects = this.room.objects; this.camera = this.room.camera; this.safePoint = this.room.entranceSafePoint; this.room = null; }
-    this.camera = Math.max(0, this.safePoint - 220);
-    if (this.shield) { this.shield = 0; this.launch(); this.emit('shield', 'Spirit Shield held the fall · returning to your last safe point.'); return; }
+    this.camera = Math.max(0, this.safePoint - (H - 226));
+    if (this.shield) { this.shield = 0; this.resumeFromRecovery(); this.emit('shield', 'Spirit Shield held the fall · returning to your last safe point.'); return; }
     this.lives--; this.shake = 12;
     if (this.lives <= 0) { this.lives = 0; this.state = 'gameover'; this.emit('gameover', 'Even little spirits need a second chance.'); return; }
-    this.launch(); this.emit('lost', (fromRoom ? 'Portal room ended · ' : 'Fall boundary crossed · ') + 'one bell fades. Returning to last safe point.');
+    this.resumeFromRecovery(); this.emit('lost', (fromRoom ? 'Portal room ended · ' : 'Center drain crossed · ') + 'one bell fades. Returning from above the last safe point.');
   }
 
   continueCheckpoint() { this.lives = 7; this.safePoint = this.checkpoint; this.camera = Math.max(0, this.checkpoint - 220); this.maxHeight = this.checkpoint; this.biome = Math.floor(this.checkpoint / 1500) % 3; this.state = 'playing'; this.launch(); this.emit('checkpoint', 'Returning to ' + BIOMES[this.biome].name + ' checkpoint.'); }
@@ -203,9 +204,11 @@ export class Game {
 
     for (let i = 0; i < 2; i++) {
       const f = this.flipper(i), hit = segmentHit(b, f, { x: f.ex, y: f.ey });
-      if (hit.dist < b.r + 9 && b.y > hit.y - 10 && b.vy < 200 && this.strikeLock === 0 && this.tapWindow[i] > 0) {
+      if (hit.dist < b.r + 9 && b.y > hit.y - 10 && b.vy < 200 && this.strikeLock === 0) {
         const timed = this.tapWindow[i] > 0;
-        b.y = hit.y + b.r + 10; b.vy = timed ? 900 : 25; b.vx = (i === 0 ? 1 : -1) * (timed ? (105 + hit.t * 240) : 45);
+        b.y = hit.y + b.r + 10;
+        b.vy = timed ? 900 : Math.max(80, Math.min(130, Math.abs(b.vy) * .18 + 55));
+        b.vx = (i === 0 ? 1 : -1) * (timed ? (105 + hit.t * 240) : 36);
         this.tapWindow[i] = 0; this.strikeLock = .13; this.emit(timed ? 'flip' : 'catch'); this.burst(b.x, b.y, BIOMES[this.biome].color, timed ? 9 : 4);
         if (timed && this.lesson === 0) { this.lesson = 1; this.emit('tutorial', 'Good save. Release, then tap again just before contact to choose a stronger route.'); }
       }
@@ -245,7 +248,10 @@ export class Game {
     }
     this.camera += (Math.max(this.camera, b.y - 470) - this.camera) * Math.min(1, dt * 6);
     if (!this.room) {
-      this.maxHeight = Math.max(this.maxHeight, b.y - 146); this.safePoint = Math.max(this.safePoint, Math.floor(this.maxHeight / 250) * 250);
+      const measuredHeight = b.y - 146;
+      if (this.recovering && measuredHeight <= this.safePoint) this.recovering = false;
+      if (!this.recovering) this.maxHeight = Math.max(this.maxHeight, measuredHeight);
+      this.safePoint = Math.max(this.safePoint, Math.floor(this.maxHeight / 250) * 250);
       const zone = Math.floor(this.maxHeight / 1500);
       if (zone > Math.floor(this.checkpoint / 1500)) {
         this.checkpoint = zone * 1500; this.safePoint = Math.max(this.safePoint, this.checkpoint); this.biome = zone % 3; this.persistCheckpoint();
@@ -254,7 +260,8 @@ export class Game {
       if (this.maxHeight >= (this.cycle + 1) * 4500) { this.persistCheckpoint(); this.state = 'summit'; this.emit('summit'); }
       this.generate(this.camera + 1800);
     }
-    if (b.y < this.camera - 45) this.loseLife();
+    const crossedCenterDrain = !this.room && b.y < this.camera + 78 && b.x > 158 && b.x < 262;
+    if (crossedCenterDrain || b.y < this.camera - 45) this.loseLife();
     b.trail.unshift({ x: b.x, y: b.y }); if (b.trail.length > 22) b.trail.pop();
     for (const p of this.particles) { p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt * 1.6; }
     this.particles = this.particles.filter(p => p.life > 0);
