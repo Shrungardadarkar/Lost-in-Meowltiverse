@@ -33,4 +33,6 @@ The current playable scope includes Chrome Root, Tide Cathedral, Clockwork Bloom
 4. Run short observational playtests and tune challenge from evidence.
 5. Add persistent save only after the session loop is proven.
 
+Read the current evidence and priority order in [the full game review](reviews/2026-09-26-full-game-review.md).
+
 Multiplayer, shared worlds, resource competition, accounts, analytics, monetization, and social systems are explicitly out of scope for this phase.
