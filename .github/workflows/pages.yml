@@ -40,7 +40,7 @@ jobs:
       - name: Prepare static game
         run: |
           mkdir _site
-          cp index.html style.css engine.js game.js _site/
+          cp index.html style.css options.css engine.js game.js chambers.js living-art.js _site/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

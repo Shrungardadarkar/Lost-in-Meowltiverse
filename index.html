@@ -4,6 +4,7 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#100e20"><title>Lost in Meowltiverse — A pinball odyssey</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="options.css">
 </head>
 <body>
   <main class="phone-shell" aria-label="Lost in Meowltiverse game">
@@ -11,8 +12,9 @@
       <canvas id="game" width="420" height="760" aria-label="Pinball playfield. Use left and right arrows to operate flippers."></canvas>
       <div class="hud"><div><span class="hud-label">BELLS</span><div id="bells" aria-label="7 lives"></div></div><div class="altitude"><span class="hud-label">ALTITUDE</span><strong id="height">0000<span> m</span></strong></div></div>
       <div class="biome-pill"><span id="biomeDot"></span><span id="biomeName">CHROME ROOT</span></div>
-      <div class="touch-controls" aria-label="Touch flipper controls"><button id="leftControl" aria-label="Left flipper"></button><button id="rightControl" aria-label="Right flipper"></button></div>
-      <div class="overlay" id="overlay"><div class="overlay-content"><div class="cat-mark" aria-hidden="true">✧</div><h1 id="overlayTitle">Lost in<br>Meowltiverse</h1><p id="overlayText">Find your dog, one well-timed bounce at a time.</p><button class="primary" id="playButton">Begin <span>↗</span></button><p class="overlay-hint" id="overlayHint">TAP A FLIPPER AT CONTACT</p></div></div>
+      <button id="pauseToggle" class="pause-toggle" aria-label="Pause or resume game">Ⅱ</button>
+      <div class="touch-controls" aria-label="Touch flipper controls"><button id="leftControl" aria-label="Left flipper">↖</button><button id="rightControl" aria-label="Right flipper">↗</button></div>
+      <div class="overlay" id="overlay"><div class="overlay-content"><div class="cat-mark" aria-hidden="true">✧</div><h1 id="overlayTitle">Lost in<br>Meowltiverse</h1><p id="overlayText">Light both orbit lanes. Break the roof. Find your dog beyond the machine.</p><button class="primary" id="playButton">Begin <span>↗</span></button><div class="pause-options" id="pauseOptions" hidden><button id="soundButton" type="button">Sound: Off</button><button id="adaptationButton" type="button"></button><button id="resetAdaptationButton" type="button">Reset room learning</button><small>Assistance only widens future route entrances. No physics changes.</small><details id="journal"><summary>Dog trail</summary><p id="journalText"></p></details><div id="devTools" hidden><label for="roomPreview">Local room preview</label><select id="roomPreview"></select><button id="previewButton">Open preview</button></div></div><p class="overlay-hint" id="overlayHint">ARROWS / TAP SIDES · HOLD TO CATCH · RELEASE THEN TAP TO AIM</p></div></div>
     </div>
   </main>
   <script type="module" src="game.js"></script>

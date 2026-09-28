@@ -1,11 +1,24 @@
 # Lost in Meowltiverse: pinball systems and adaptive level plan
 
-Status: **local implementation through contact-point shot fans, soft-catch/release feedback, swept contacts, bounded adaptation, seeded validation, and replay-stability tests; full room library and agent/fuzz gates remain future work**  
+Status: **local prototype now has a short physical cradle/pass, role-safe room variants, distinct portal layouts, shared visual/physics clocks, seeded replay, and automated objective/summit probes; full room contracts and human acceptance remain open**
 Working mode: **local-first**. Play and test at `http://localhost:4173/` in the Codex browser. Do not push to GitHub automatically; request a publish/review decision after a locally accepted milestone.
 
 ## Local integration note — 2026-09-26
 
-Before this slice, `origin/main` was fast-forwarded from `cb288a4` to merge commit `c1b22b7`. The incoming `5e90a5c` work made two three-hit cat rescues the adventure objective and added Portal Pulse. The local implementation now includes ordinary bumper reflection, a linked optional bridge in Chrome Root, contact-point shot fans, soft-catch/release posture, swept circular contacts, bounded skill adaptation, seeded module metadata, geometry validation, replay-stability checks, and repeated-cycle generation checks. It does **not** yet implement a full room library, compatibility graph, agent playthroughs, or broad fuzz/property gate. The current suite covers these invariants; human playability of the rescue route still needs local observation.
+Before this slice, `origin/main` was fast-forwarded from `cb288a4` to merge commit `c1b22b7`. The incoming `5e90a5c` work made two three-hit cat rescues the adventure objective and added Portal Pulse. The local build now includes eight layout variants per biome, a short physical cradle/pass, role-safe seeded composition, distinct portal spaces, a rescue boundary, clock-accurate rule visuals, replay traces, multi-seed chapter invariants, and a timing probe that reaches the false summit on 12 sampled seeds. The remaining plan gaps are measured entry/exit contracts, full individual room cards, broader reachability and performance checks, and human playtests. The historical baseline below describes the build at planning time; it is not the current test count.
+
+### Current acceptance audit
+
+| Milestone | Current evidence | Still required |
+| --- | --- | --- |
+| 0. Baseline and instrumentation | Versioned seed, `replayTrace()`, optional `?dev=1` local input capture, 48 passing engine tests. | Save and review human playtest traces and known failing seeds. |
+| 1. Pinball feel | Contact-point shot fan, 0.3-second cradle, cross-flipper pass, one-way rails, swept circular contacts. Idle/hold-both lose; a timing probe reaches the summit on 12 seeds. | Human tuning of shot feel and contact legibility. |
+| 2. Room slices | Opening catch/gate choice, resonance bank, timed gate, rescue threshold, optional portal routes. | Observed player understanding and individually reviewed room cards. |
+| 3. Living world and camera | Currents, mandalas, shared gate simulation clock, bounded accents, reduced-motion direction cues, rescue camera cap. | Human sensory and camera check during a full run. |
+| 4. Authored library | Eight layout variants per biome, grouped route cards, distinct pocket rooms. | Individual 8–12 room cards per biome and more story-specific feeds. |
+| 5. Composer | Fixed role order, seed/version, geometry and objective checks, safe fallback, multi-seed invariant tests, twelve-seed summit probe. | Measured entry/exit compatibility, broad reachability fuzzing, and mobile performance profiling. |
+| 6. Adaptation | Role-preserving future-room selection; pause offers off/reset. | Human evidence that choices improve clarity and challenge fit. |
+| 7. Release | Local browser and responsive layout checks; documentation updated. | User playtest and acceptance before another publish decision. |
 
 ## 1. Design thesis
 
@@ -13,7 +26,7 @@ Make the orb's route feel *chosen*, not merely witnessed. Two flippers remain th
 
 “Engaging” here means rising competence, expressive decisions, coherent surprise, and curiosity about the dog and new worlds. It does **not** mean maximizing session length, distress, variable rewards, or retention.
 
-## 2. Current build: evidence and gaps
+## 2. Planning-time build: evidence and gaps
 
 The prototype already has a 120 Hz simulation, two flippers, a center drain, side guards, three biomes, portals, temporary room physics, mandalas, seven bells, checkpoints, and 20 passing tests. Its current strengths are an approachable input scheme and clear overall fantasy. Its limitations are structural:
 

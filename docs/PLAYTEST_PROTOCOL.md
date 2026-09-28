@@ -15,6 +15,8 @@ Use short sessions to test comprehension, skill–challenge fit, recovery clarit
    - Did the game give you a satisfying point to stop? Why or why not?
 4. Separate observed behavior from player interpretation. Do not diagnose participants or make clinical claims.
 
+For version 7, observe whether a new player can identify the two numbered cabinet orbits and subsequent roof shot, deliberately repeat a route, use a catch/pass, explain a switch or petal prerequisite, predict the selected return, and distinguish the six pocket rules before entry. Ask whether the rescue bridge and dog clue feel like meaningful consequences. Record table, room, seed and input trace for repeatable stalls. The input-only fixtures prove routes exist, not that humans can read or enjoy them. Also check physical-device multitouch and reduced-motion comfort; browser pointer checks do not replace those sessions.
+
 ## Report format
 
 | Evidence | Interpretation | Confidence | Next experiment |

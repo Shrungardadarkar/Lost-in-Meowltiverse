@@ -4,6 +4,8 @@ This is the shared context for people and agents working on the game. Read this 
 
 ## Source of truth and working agreement
 
+- Current gameplay baseline: `docs/FEATURE_REGISTER.md` and `docs/rooms/living-machine-chambers.md` (generator/replay version 7). Earlier GDD and September 26 reviews are history where they conflict. Read the register before treating an old feature list as current behavior.
+
 - The GitHub repository is the public source of truth. Work in this repository; do not use sibling prototype folders as a competing source.
 - Every meaningful change must update the relevant documentation in the same pull request. Update `CHANGELOG.md` for player-visible changes, `docs/DECISIONS.md` for durable design decisions, and a room card for new or materially changed rooms.
 - Keep a pull request focused. Explain player impact, behavioral-design impact, validation, and documentation changes using the PR template.
@@ -36,9 +38,12 @@ Main-climb physics are reliable. A portal introduces one temporary, telegraphed 
 ## Architecture
 
 - `engine.js`: deterministic fixed-step simulation, physics, progression, level objects.
+- `chambers.js`: authored chamber/pocket geometry, return contracts and shared moving-surface poses.
 - `game.js`: rendering, input, audio, HUD, overlays.
+- `living-art.js`: track, mechanism, material and pocket-rule drawing.
 - `index.html` and `style.css`: accessible responsive shell.
 - `tests/engine.test.mjs`: regression tests for rules and progression.
+- `tests/living-machine.test.mjs`, `tests/fixtures/`: current contracts and actual input-only completion witnesses. `scripts/route-probe.mjs` is developer-only bounded input search, not runtime autoplay or self-training.
 - `docs/`: project intent, behavioral rules, orchestration, design decisions, room cards, and playtest materials.
 - `.codex/skills/`: reusable skills for agents working in this repository.
 

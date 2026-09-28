@@ -42,7 +42,7 @@
 5. **Recovery:** portal and main falls use existing visible safe-point rules.
 6. **Compulsion guard:** no random payout, countdown, or mandatory detour.
 7. **Reduced motion:** portal shape, color, and HUD remain without transition motion.
-8. **Rest:** next adventure-complete overlay is a voluntary pause.
+8. **Rest:** the next adventure begins without a modal; pause remains available, and the false summit requires a deliberate flipper tap before continuing.
 
 ## Implementation and validation
 

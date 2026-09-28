@@ -1,0 +1,24 @@
+.pause-options[hidden] { display: none; }
+.pause-options { display: grid; gap: 8px; margin: 16px auto 0; max-width: 245px; }
+.pause-options button { padding: 10px 12px; border: 1px solid #b8f8d866; border-radius: 8px; background: #17172a; color: #d8f7e8; font-size: 11px; }
+.pause-options button:hover { background: #263747; }
+.pause-options small { color: #b8acc9; font-size: 9px; line-height: 1.4; }
+.pause-toggle { position:absolute; z-index:4; right:20px; top:55px; width:34px; height:30px; border:0; border-radius:8px; background:#15172b99; color:#d4c9e5; }
+.biome-pill { top:62px; font-size:7px; letter-spacing:1.3px; }
+.touch-controls button { color:#d0f7e577; font-size:22px; }
+.overlay-content { max-height:90%; overflow-y:auto; scrollbar-width:thin; }
+.overlay:has(.pause-options:not([hidden])) .overlay-content { margin-top:20px; }
+.pause-options details { text-align:left; color:#d1c6e4; font-size:11px; }
+.pause-options summary { cursor:pointer; padding:8px 0; }
+.pause-options #journalText { white-space:pre-line; font-size:11px; text-align:left; margin:8px 0; }
+#devTools[hidden] { display:none; }
+#devTools { display:grid; gap:6px; }
+#devTools label { font-size:10px; }
+#roomPreview { width:100%; padding:8px; background:#202039; color:#e6dfef; border:1px solid #b8f8d866; border-radius:6px; }
+/* Never stretch a physics table: preserve the same angles on every screen. */
+.phone-shell { width:min(420px,100vw,calc(100svh * .55263158)); padding:0; }
+@media(max-width:480px) {
+  body { display:grid; place-items:center; }
+  .phone-shell { min-height:0; }
+  .game-frame { height:auto; aspect-ratio:420/760; }
+}

@@ -1,54 +1,61 @@
 # Lost in Meowltiverse
 
-A focused, phone-sized portrait pinball adventure about a cat spirit searching for its lost dog friend. Seven collar-bell lives, floating flippers, strange pocket dimensions, and a summit that is only the beginning.
+A portrait, two-flipper pinball adventure about a cat spirit searching for its lost dog friend. Begin inside a classic machine, break its ceiling, then reshape an endless psychedelic machine through deliberate shots.
 
-**[Play in your browser](https://shrungardadarkar.github.io/Lost-in-Meowltiverse/)** · [Game design document](GAME_DESIGN.md) · [Contributing](CONTRIBUTING.md)
+[Published build](https://shrungardadarkar.github.io/Lost-in-Meowltiverse/) · [Current feature register](docs/FEATURE_REGISTER.md) · [Contributor context](AGENTS.md)
 
-## Play
+The local version may be ahead of the published build. Development is local-first; publishing requires the owner's explicit request.
 
-- Use **left/right arrows** or **A/D** to operate the flippers. Release, then tap as the orb meets a flipper: a close tap creates the strongest shot; a late tap is a recovery. Holding a key is deliberately not a substitute for timing.
-- Read the chevrons on bank rails: send the orb into a rail in its displayed direction for a powerful route. The opposite entry is safe but weaker.
-- On mobile, tap either half of the playfield. Both sides support simultaneous touches.
-- The lower side lanes are protected by inward guide rails; the labelled center drain is the only bell-costing route at the base.
-- Press **P** or **Escape** to pause. Enable optional sound with the music button.
-- Hit glowing portals to enter low-gravity/current or slow-time rooms. Living currents push the orb, Clockwork mandalas redirect it, and rhythm gates make their open state visible. Collect three visible stardust in a room to restore one bell, then exit through the return ring or automatically after 30 seconds.
-- Bump a possessed cat three times to free it. Rescue two cats to heal the current adventure and unlock the next one. Portal completion grants a Spirit Shield and a one-use Portal Pulse, which adds two rescue marks on your next cat strike. Marked bells restore a life; lives never exceed seven.
-- Each 150 displayed meters reaches a biome checkpoint. At zero bells, continue from that checkpoint. A voluntary local checkpoint save lets a player leave without losing their place. The false summit is at 450 meters, followed by another universe.
+## Play locally
 
-## Develop locally
-
-Install Node.js 22 or newer. This game has no npm dependencies and no build step.
+Node.js 22 or newer; no dependencies or build step:
 
 ```sh
-git clone https://github.com/Shrungardadarkar/Lost-in-Meowltiverse.git
-cd Lost-in-Meowltiverse
 npm start
 ```
 
-Open http://localhost:4173. The local server is for development only. To check the simulation:
+Open http://localhost:4173/?fresh=1 for a new run without changing a saved checkpoint.
+
+- Left/right arrows, A/D, or the corresponding half of the playfield operate the flippers.
+- Tap near contact to shoot. Timing and contact position change the shot angle. Hold a soft contact to cradle indefinitely; release then tap to shoot again. Release while pressing the opposite flipper for a pass.
+- Light both numbered cabinet orbits, then shoot the cracked roof.
+- Chamber mechanisms change real routes: switch → ramp, two lane petals → opening, sluice → current route, seals → rescued spirit, latch → timed gate. Lit tracks show their return; dashed tracks are not yet available.
+- A freed spirit opens the exit bridge. Score never gates progress. Misses return to the flippers; the marked drain costs one of seven collar bells.
+- Optional doors advertise their rule before entry. Each of six pocket types has three stars and an available return ring. Three stars grant a bell (capped at seven), shield and pulse; no countdown or forced exit.
+- The gold shield outline protects one fall. The violet pulse outline catches one marginal route shot; its extra reach is drawn around open mouths.
+- P, Escape, or Ⅱ pauses. Sound, assistance and the dog-trail journal are in pause only. No routine popups interrupt play.
+- Every two chambers saves a biome checkpoint (180 displayed metres). The six-chamber false summit is at 540 metres; it waits for a fresh flipper input before another universe.
+
+## Test and preview
 
 ```sh
 npm test
+npm run test:routes
+node --check game.js
 ```
+
+- `?fresh=1&dev=1`: pause contains a room-preview selector for the cabinet, all chambers and six pockets.
+- `?fresh=1&dev=1&table=0` through `table=5`: direct chamber previews.
+- `?fresh=1&dev=1&pocket=echo`: pocket preview; kinds are tide, time, side, scale, mirror, echo.
+- Add `&reduced=1` to exercise reduced-motion rendering; the OS preference is also honored.
+- Developer input capture: `window.meowltiverseDebug.getReplay()`. Replay with `replayTrace(recording)` from the engine. Captures include transitions and assistance setting changes. No data leaves the browser.
+
+The developer route probe searches bounded input sequences on cloned simulations. It never changes the production game or substitutes objectives. The regression fixtures include a complete cabinet-to-summit journey and all pocket constellations. Human playtesting is still required for quality and comfort.
 
 ## Project map
 
-| File | Purpose |
+| File | Responsibility |
 | --- | --- |
-| `engine.js` | Fixed-step physics, timed flippers, authored module decks, living environments, portals, lives, checkpoints |
-| `game.js` | Canvas artwork, input, audio, HUD, game loop |
-| `style.css` / `index.html` | Responsive portrait game shell |
-| `tests/engine.test.mjs` | Simulation and progression regression tests |
-| `GAME_DESIGN.md` | Original game design and longer-term direction |
+| `engine.js` | Fixed-step physics, routes, goals, lives, progression, pockets, replay |
+| `chambers.js` | Authored chambers, pocket contracts, geometry validation, moving-surface poses |
+| `game.js` / `living-art.js` | Rendering, input, animation, audio and clean HUD |
+| `index.html` / `style.css` / `options.css` | Responsive, aspect-correct phone shell and intentional pause UI |
+| `tests/` / `scripts/route-probe.mjs` | Unit/contract regression, input-only witnesses, developer search |
+| `docs/FEATURE_REGISTER.md` | Current implemented scope, evidence and honest limits |
+| `docs/rooms/living-machine-chambers.md` | Current chamber/pocket authoring cards and cue sheet |
 
-`window.meowltiverse` exposes the simulation for local debugging. Art is drawn in canvas; sound is synthesized. Fonts use Google Fonts with system fallbacks.
+## Publish and contribute
 
-## Publishing
+An authorized push to main runs tests and publishes the static files through GitHub Pages; PRs only test. No backend, analytics or API keys. Follow [CONTRIBUTING.md](CONTRIBUTING.md), maintain the feature register, and separate prototype implementation from human acceptance. The original [GDD](GAME_DESIGN.md) and older reviews are historical proposals where they conflict with the current register.
 
-Pushes to `main` run the tests and deploy the four static game files to GitHub Pages. Pull requests run tests without deploying. The workflow can also be run manually from the Actions tab. No API keys or application backend are needed.
-
-## Prototype status
-
-This is an early solo prototype with three biome art languages, side-rail safety, tap-timing pinball physics, authored climb modules, living current and mandala interactions, two portal rule sets, spirit rescues, local checkpoint recovery, and endless continuation. More room cards, final narrative art, observational playtests, accessibility improvements, and multiplayer remain future work.
-
-Contributions and playtest reports are welcome. Code and original project artwork are available under the [MIT license](LICENSE). Third-party fonts retain their own licenses.
+Code and original artwork: [MIT](LICENSE). Third-party fonts retain their own licences.

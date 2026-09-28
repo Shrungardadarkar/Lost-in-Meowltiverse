@@ -13,9 +13,9 @@
 | Stage | Layout and behavior | Player feedback | Failure and recovery |
 | --- | --- | --- | --- |
 | Preview | Portal shows horizontal current ribbons and says “Low gravity.” | Color, particle direction, portal label, and brief sound change. | Player remains on the main route if the portal is missed. |
-| Practice | First bumper sits in the current’s center, creating a gentle high arc. | Long trail and slow ball fall make the changed rule visible. | A missed shot drops to the normal bell recovery system. |
-| Mastery shot | Three stardust targets alternate left and right in the current. | Each target lights the next; HUD says “collect 3 stardust for a bell.” | Targets remain available; no countdown or rare outcome. |
-| Release | Return ring sits above the final target. | Warm gold ring and homeward sound motif. | Automatic 30-second return exists only as an anti-stuck safety exit. |
+| Practice | The first of three broad current bands pushes across a side bumper. | Static arrows and slow ribbons show the actual push. | A missed shot drops to the normal bell recovery system. |
+| Mastery shot | Three stardust alternate sides across separated current bands. | Collected targets disappear; the HUD states the three-stardust objective. | Targets remain available; no countdown or rare outcome. |
+| Release | Return ring sits on the upper right, unlike the time room's left exit. | Warm gold ring and homeward sound motif. | Automatic 30-second return exists only as an anti-stuck safety exit. |
 
 ## Routes and rewards
 

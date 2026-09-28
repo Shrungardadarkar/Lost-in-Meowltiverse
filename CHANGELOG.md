@@ -4,8 +4,30 @@ All notable player-facing and contributor-facing changes are recorded here. This
 
 ## Unreleased
 
+### 2026-09-28 — Living machine redesign (local)
+
+- Replaced uniform three-hit rescues and launch rails with six transforming chamber goals and visible orbit/ramp/exit tracks with known flipper returns.
+- Rebuilt the classic opening around two distinct orbit lanes and a final roof shot. The orb now travels through the shatter/suction transition instead of freezing and relaunching from the drain.
+- Added sustained cradles, a wider timing-driven aim fan, physical side returns, permanent shot provenance until recovery, and pause-safe animated ascent.
+- Placed and rendered breakable rescue seals, marked bells, moving/rotating collision surfaces, friendly spirit bridges and a six-clue dog trail with a pause-only journal.
+- Added six accessible, untimed pocket dimensions: current, time, sideways/local gravity, size, mirror and delayed echo. Material silhouettes expose the local rule; time previews and echo-only targets support timing play.
+- Added biome/route musical phrases, selected-return cues, reduced-motion alternatives, mobile pause access and aspect-correct scaling.
+- Added authored route contracts, local opt-in role-based assistance, versioned replay controls, a developer room selector, and input-only regression witnesses for the full first universe and all six pockets.
+- Current prototype scope and limitations are maintained in `docs/FEATURE_REGISTER.md`. The entries below are chronological design history and include superseded behaviors.
+
 ### Changed
 
+- New runs now begin in **Midnight Arcade**, a compact classic pinball table. Lighting three physical targets makes the ceiling a deliberate escape shot, which shatters into a short, bounded pull-through to Chrome Root without covering play with a modal. Checkpoint resumes skip the prologue; reduced-motion mode uses persistent target/ceiling states and a calm color transition.
+- Replaced the old stacked 300-unit climb-module generator with an authored endless table deck: two complete tables per biome, each with a local cat, return rails, a lit-on-rescue scoop, and a deterministic transfer feed. Chrome Root teaches banks, Tide Cathedral adds currents, and Clockwork Bloom adds readable gate/mandala timing.
+- Reworked the main climb into an endless chain of fixed-height pinball tables. The camera stays with a complete flipper playfield; freeing its local cat lights an upper scoop, and a deliberate scoop shot feeds the next table from above.
+- Cat rescues now require a recent committed flipper shot, preventing passive bumper or held-input contact from progressing the objective.
+- Removed biome-completion and false-summit modal cards. Ordinary chapter changes now feed directly into the next playable biome; the false summit waits for a fresh flipper tap on the unobstructed playfield before another universe begins.
+- Added eight authored module variants per biome, distinct Tide and Time portal spaces, a short physical cradle and cross-flipper pass, and visible rescue boundaries that keep required cats in view until freed.
+- Made mismatched bank shots return toward a flipper and let upward shots pass through rail undersides, preventing a repeatable bumper/rail loop.
+- Locked gate visuals to the same simulation clock as gate collision. Currents, mandalas, and portal rims now retain directional rule cues in reduced motion.
+- Constrained generation to preserve two rescues and one portal per adventure, added role-aware fallback and seeded replay capture for local development, and exposed room adaptation off/reset controls only on pause.
+- Restored the optional sound control inside the pause screen, keeping the live playfield free of extra buttons.
+- Pruned obsolete objects after biome checkpoints and resumed saved endless runs directly in the correct universe, keeping long climbs bounded and avoiding an old-world rebuild.
 - Made ordinary bumpers reflect the orb's incoming momentum rather than supply automatic upward speed; added a marked Chrome Root resonance target that activates one optional high bridge while preserving a safe main route.
 - Kept fall recovery anchored to the saved section until the orb reaches a flipper, preventing recovery camera drift and restoring climb tracking on the next deliberate shot.
 - Added a visible soft-catch posture for held flippers; holding settles a contact but cannot create a launch.

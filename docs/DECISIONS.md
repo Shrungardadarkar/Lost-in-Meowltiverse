@@ -2,6 +2,22 @@
 
 Record decisions that future contributors and agents must not rediscover. Add the date, decision, why it matters, and the superseding entry if a decision changes.
 
+## 2026-09-28 — Living machine is the current baseline
+
+The owner approved building the audited solo features, locally. `FEATURE_REGISTER.md` and `rooms/living-machine-chambers.md` supersede earlier three-hit rescue quotas, five-module adventures, .3-second cradles, .65-second shot credit, forced second-rail drains, launch-impulse rails and 30-second pocket expiry. Do not reintroduce those assumptions from historical documents.
+
+- Two cabinet orbit lanes and a final roof shot replace three bumper targets. Continuous bounded shatter/suction leads into six transformative chamber roles.
+- Real drawn track traversal represents an elevated constrained pinball wireform. Only an ascending player shot enters; it feeds a documented flipper endpoint. It is not an idle-play altitude generator.
+- Catches may be held indefinitely. Side guides are physical surfaces, never contact-count teleports. Shot provenance lasts until a return/catch, allowing long banks to count.
+- Local mechanisms vary: switch, paired lanes, sluice, breakable seals, timed setup and combined lanes. Free spirits open exits and preserve dog clues. Two tables still form one biome checkpoint; false summit remains voluntary.
+- Pockets are single-screen and untimed with an immediately available return. Six material silhouettes express the six temporary rules. Echoes are non-solid delayed traces; they cannot steer or collide with the main ball.
+- Portal Pulse now assists one route-mouth edge by eight visible units; it is consumed only when that margin catches a shot. This replaces the redundant two-mark rescue reward in one-hit mechanism rescues. The shield remains a separate one-fall protection.
+- The protected ascent and roof transitions can pause. Reduced motion removes shake, debris, squash and decorative rotation, retaining geometry, state changes and the continuous ball.
+- Assistance is opt-in and local, using role-specific attempts/routes/falls to widen future entrances. It is not reinforcement learning. Versioned replay and developer route search support a human-reviewed regression loop. No telemetry or retention optimization.
+- Checkpoint saves include discovered clues. Developer previews and fresh runs never overwrite the player's checkpoint. Local changes do not imply permission to publish.
+
+This approval covers playable prototypes, not a claim of human-validated world-class level design. Record human acceptance gaps rather than marking them complete from unit tests.
+
 ## 2026-09-26 — Flow over compulsion
 
 The solo game is recreational and flow-led. It will not use variable or score-threshold life rewards, streaks, re-entry incentives, scarcity, or progression that requires repeated play. Session closure is a design requirement.
@@ -44,11 +60,27 @@ Three visible stardust in a portal restores one collar bell when needed and gran
 
 ## 2026-09-26 — Rescue is the adventure objective
 
-Each adventure asks for two visible possessed-cat rescues. A cat takes three pinball impacts, visibly shedding one rescue mark per impact before leaving as a free spirit. Completing the target pauses at a calm transition to the next adventure. Portal completion also grants one Portal Pulse: the next cat impact provides two rescue marks, making portal skill directly useful to the rescue loop.
+Each adventure asks for two visible possessed-cat rescues. A cat takes three pinball impacts, visibly shedding one rescue mark per impact before leaving as a free spirit. Completing the target feeds quietly into the next adventure. Portal completion also grants one Portal Pulse: the next cat impact provides two rescue marks, making portal skill directly useful to the rescue loop.
 
 ## 2026-09-26 — The playfield is the interface
 
-The prototype presents one phone-sized playfield, not a dashboard. Routine feedback must be embedded in the ball, geometry, color, sound, and motion instead of toast notifications, persistent rule copy, activity feeds, score counters, or side-panel progression. A short overlay is reserved for an intentional start, pause, full loss, or false summit.
+The prototype presents one phone-sized playfield, not a dashboard. Routine feedback must be embedded in the ball, geometry, color, sound, and motion instead of toast notifications, persistent rule copy, activity feeds, score counters, or side-panel progression. A short overlay is reserved only for an intentional start, pause, or full loss; the false summit remains visible on the playfield itself.
+
+## 2026-09-26 — Chapter changes do not interrupt play
+
+Freeing the second required spirit immediately and quietly carries the orb into the next biome's recovery feed. There is no completion card, continue button, or required dismissal between ordinary adventures. The false summit remains a voluntary session boundary: the playfield stays visible and still, and only a fresh flipper tap begins another universe. This preserves a deliberate continuation choice without covering the game with a modal.
+
+## 2026-09-26 — Endlessness is a chain of pinball tables
+
+The main world remains endless and vertical, but its local grammar is a complete pinball table rather than a freefalling obstacle climb. The camera is anchored to the active table. A visible cat rescue lights that table's upper scoop; only an intentional scoop shot changes tables, feeding the orb predictably from above into the next flipper field. A recent committed flipper shot is required to mark a cat, so passive contact, bumper loops, and held input cannot solve an objective. This makes each new world feel earned while preserving repeatable returns, drains, and route choice.
+
+## 2026-09-28 — Biome identity is taught through table grammar
+
+The endless generator selects from authored, table-complete layouts rather than raw stacked objects. Every biome has an orientation table and an integration table, with bounded same-role variants for later cycles. Chrome Root introduces stable banks and resonance links; Tide Cathedral introduces one visible current and retains a non-current return; Clockwork Bloom introduces one visible gate/mandala timing demand with a bypass. Every table keeps one cat, two lower return rails, a dim/open scoop, and a deterministic entry/exit contract. The optional portal belongs to the integration table and never replaces the main route.
+
+## 2026-09-28 — The first ceiling break is played, not announced
+
+Fresh runs open inside Midnight Arcade, a small classic pinball cabinet. Three visible target hits permanently light the ceiling shot; only then does a ceiling impact begin a short, controlled shatter-and-pull transition into Chrome Root. This teaches physical flipper agency before multiverse rules appear and keeps the story beat inside the playfield rather than inside a modal. It is a one-time, score-free, timer-free sequence; resumed checkpoints skip it. The effect uses a bounded anticipation, cabinet vibration, outward fragments, and a directional inward vortex while preserving the ball/flippers. Reduced motion instead uses persistent lit states, a cracked roof, and one smooth color/portal wash with no shake or fragments.
 
 ## 2026-09-26 — Momentum must be earned through a readable route
 
@@ -77,6 +109,22 @@ A fresh flipper press now uses the orb's contact fraction along the flipper to v
 ## 2026-09-26 — Opening rooms must present a choice before a target
 
 The first Chrome Root modules now place a visible center gate or directional bank before the next rescue/portal objective. The player can choose a clean setup through the gate or a left/right release bank; neither route is score-gated or required for survival. Rescue rooms also show side approach rails so repeated cat impacts are shaped by aim rather than passive bumper contact.
+
+## 2026-09-26 — Required rescues are structural and remain visible
+
+Every generated five-module adventure has exactly two rescue modules and one optional portal module. Adaptation may only substitute a variant with the same role. A thin boundary above the current unfinished cat returns premature climbs without taking a bell; camera tracking keeps that cat in view. This prevents an endless climb from abandoning an incomplete objective.
+
+## 2026-09-26 — A held contact is a brief physical cradle
+
+Holding a flipper at soft contact anchors the orb for at most 0.3 seconds. Releasing creates a gentle feed; releasing while pressing the opposite flipper creates a low cross-table pass. Neither grants a mastery launch. Wrong-way rail contact now returns downward toward a flipper, while upward shots pass rail undersides so rails cannot steal a committed shot.
+
+## 2026-09-26 — Physics and rule cues share one clock
+
+Gate openness and its drawn aperture use the same simulation-time function, including while paused or in reduced motion. Mandala direction and current force also retain static shape cues. Tide and Time portals have distinct geometry and return feeds while preserving their single temporary physics change.
+
+## 2026-09-26 — Adaptation remains local and optional
+
+The pause screen exposes adaptation on/off and a reset of the session skill estimate. Changes affect future generated rooms only. No game physics, objective count, saved checkpoint, account, or remote telemetry changes with this setting. Developer replay capture is opt-in via a local query flag and exports a seed and input trace without a player-facing overlay.
 
 ## 2026-09-26 — Repository context is part of the product
 
